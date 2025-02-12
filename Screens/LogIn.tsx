@@ -1,14 +1,17 @@
+/* eslint-disable react-native/no-inline-styles */
 import { View, Text, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, } from 'react-native'
-import React from 'react'
-import { TextInput } from 'react-native-paper';
+import React, { useState } from 'react'
+import { shadow, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import Animated, { FadeIn, FadeInDown, FadeInLeft } from 'react-native-reanimated';
-import { createAnimatedComponent } from 'react-native-reanimated/lib/typescript/createAnimatedComponent';
+import Animated, {  FadeInDown, FadeInLeft } from 'react-native-reanimated';
+// import { createAnimatedComponent } from 'react-native-reanimated/lib/typescript/createAnimatedComponent';
 
 export default function LogIn() {
   const isDark = useColorScheme() === 'dark';
   const width = Dimensions.get('window').width;
   const height = Dimensions.get('window').height;
+
+  const [show,setShow] = useState<any>(false);
 
   const { navigate } = useNavigation<any>();
   return (
@@ -50,6 +53,7 @@ export default function LogIn() {
                   borderWidth: 1,
                   width: '100%',
                 }}
+                secureTextEntry={show}
                 style={{
                   width: '100%',
                   marginHorizontal: 'auto',
@@ -58,10 +62,21 @@ export default function LogIn() {
                   backgroundColor: 'white'
                 }}
               />
-              <Image
-                source={require('../assets/Images/eyeSeen.png')}
-                style={{ width: 22, height: 15.5, position: 'absolute', right: '8%', }}
-              />
+              <TouchableOpacity style={{position: 'absolute', right: '8%',}} onPress={()=>setShow(!show)}>
+              {
+                !show? (
+                  <Image
+                    source={require('../assets/Images/eyeSeen.png')}
+                    style={{ width: 22, height: 15.5, }}
+                  />
+                ) : (
+                  <Image
+                    source={require('../assets/Images/eyeHide.png')}
+                    style={{ width: 22, height: 15.5, }}
+                  />
+                )
+              }
+                </TouchableOpacity>
             </View>
             <TouchableOpacity>
               <Text style={{ width: '90%', marginHorizontal: 'auto', marginLeft: 25, marginTop: 10, fontSize: 14, fontWeight: '600' }}>Forget Password?</Text>
@@ -70,6 +85,29 @@ export default function LogIn() {
           <TouchableOpacity style={styles.BTN}  onPressOut={()=>  navigate('Verifications')}>
             <Text style={{ color: 'white', fontSize: 24, fontWeight: '600', }}>Log In</Text>
           </TouchableOpacity>
+
+          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
+            <TouchableOpacity>
+              <Image
+              source={{uri:'https://img.icons8.com/?size=48&id=17949&format=png'}}
+              style={{
+                width: 50,
+                height: 50,
+                marginLeft: 20
+              }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Image
+              source={{uri:'https://img.icons8.com/?size=48&id=uLWV5A9vXIPu&format=png'}}
+              style={{
+                width: 50,
+                height: 50,
+                marginLeft: 20
+              }}
+              />
+            </TouchableOpacity>
+          </View>
 
           <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ position: 'absolute', bottom: 0, width: '100%' }}>
             <TouchableOpacity style={[styles.BTNs]} onPress={() => navigate('SingIn')}>

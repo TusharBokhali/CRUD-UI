@@ -1,5 +1,8 @@
+/* eslint-disable quotes */
+/* eslint-disable jsx-quotes */
+/* eslint-disable react-native/no-inline-styles */
 import { View, Text, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -8,12 +11,13 @@ export default function SingIn() {
   const isDark = useColorScheme() === 'dark';
   const width = Dimensions.get('window').width;
   const height = Dimensions.get('window').height;
-
+  const [show, setShow] = useState<any>(false);
   const { goBack } = useNavigation<any>();
+  
   return (
     <ScrollView>
       <View style={[styles.container, { backgroundColor: isDark ? 'black' : 'white', height: height }]}>
-        <TouchableOpacity onPress={()=>goBack()}>
+        <TouchableOpacity onPress={() => goBack()}>
           <Ionicons name='chevron-back' size={36} color={isDark ? 'white' : 'black'} />
         </TouchableOpacity>
         <View style={[styles.Main, { marginTop: '30%' }]}>
@@ -88,6 +92,7 @@ export default function SingIn() {
                 mode="outlined"
                 label="Password"
                 placeholder="Password"
+                secureTextEntry={show}
                 outlineColor={isDark ? 'gray' : 'black'}
                 activeOutlineColor={isDark ? '#000000' : 'black'}
                 outlineStyle={{
@@ -105,10 +110,22 @@ export default function SingIn() {
 
                 }}
               />
-              <Image
-                source={require('../assets/Images/eyeSeen.png')}
-                style={{ width: 22, height: 15.5, position: 'absolute', right: '8%', }}
-              />
+              <TouchableOpacity style={{ position: 'absolute', right: '8%', }}
+                onPress={() => setShow(!show)}>
+                {
+                  !show ? (
+                    <Image
+                      source={require('../assets/Images/eyeSeen.png')}
+                      style={{ width: 22, height: 15.5, }}
+                    />
+                  ) : (
+                    <Image
+                      source={require('../assets/Images/eyeHide.png')}
+                      style={{ width: 22, height: 15.5, }}
+                    />
+                  )
+                }
+              </TouchableOpacity>
             </View>
 
           </View>
