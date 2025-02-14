@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 import { TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import Animated, { FadeInDown, FadeInLeft, FadeInUp } from 'react-native-reanimated';
 
 export default function SingIn() {
   const isDark = useColorScheme() === 'dark';
@@ -13,17 +14,19 @@ export default function SingIn() {
   const height = Dimensions.get('window').height;
   const [show, setShow] = useState<any>(false);
   const { goBack } = useNavigation<any>();
+
+  const AnimationBtn = Animated.createAnimatedComponent(TouchableOpacity)
   
   return (
     <ScrollView>
       <View style={[styles.container, { backgroundColor: isDark ? 'black' : 'white', height: height }]}>
-        <TouchableOpacity onPress={() => goBack()}>
+        <AnimationBtn entering={FadeInLeft.delay(200).duration(600).damping(12).springify()} onPress={() => goBack()}>
           <Ionicons name='chevron-back' size={36} color={isDark ? 'white' : 'black'} />
-        </TouchableOpacity>
+        </AnimationBtn>
         <View style={[styles.Main, { marginTop: '30%' }]}>
-          <Text style={styles.Text}>Sign Up</Text>
-          <Text style={{ opacity: 0.5, color: isDark ? 'white' : 'black', fontSize: 18, fontWeight: '500', textAlign: 'center' }}>Welcome to Company Name</Text>
-          <View style={{ width: width - 40, marginTop: 30, marginHorizontal: 'auto' }}>
+          <Animated.Text entering={FadeInUp.delay(300).duration(600).damping(12).springify()} style={styles.Text}>Sign Up</Animated.Text>
+          <Animated.Text entering={FadeInUp.delay(400).duration(600).damping(12).springify()} style={{ opacity: 0.5, color: isDark ? 'white' : 'black', fontSize: 18, fontWeight: '500', textAlign: 'center' }}>Welcome to Company Name</Animated.Text>
+          <Animated.View entering={FadeInUp.delay(500).duration(600).damping(12).springify()} style={{ width: width - 40, marginTop: 30, marginHorizontal: 'auto' }}>
             <TextInput
               mode="outlined"
               label="Name"
@@ -128,16 +131,16 @@ export default function SingIn() {
               </TouchableOpacity>
             </View>
 
-          </View>
-          <TouchableOpacity style={styles.BTN} >
+          </Animated.View>
+          <AnimationBtn entering={FadeInDown.delay(600).duration(600).damping(12).springify()} style={styles.BTN} >
             <Text style={{ color: 'white', fontSize: 24, fontWeight: '600', }}>Sign Up</Text>
-          </TouchableOpacity>
-          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
+          </AnimationBtn>
+          <Animated.View entering={FadeInDown.delay(700).duration(600).damping(12).springify()} style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
             <Text style={{ fontWeight: '600' }}>Already Have Account?</Text>
-            <TouchableOpacity onPress={() => goBack()}>
+            <AnimationBtn onPress={() => goBack()}>
               <Text style={{ textDecorationLine: 'underline', color: '#3F74FD', fontWeight: '600', fontSize: 14, marginLeft: 5 }}>Log In</Text>
-            </TouchableOpacity>
-          </View>
+            </AnimationBtn>
+          </Animated.View>
         </View>
 
       </View>

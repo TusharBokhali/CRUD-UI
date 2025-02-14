@@ -3,7 +3,7 @@ import { View, Text, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpa
 import React, { useState } from 'react'
 import { shadow, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import Animated, {  FadeInDown, FadeInLeft } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInLeft } from 'react-native-reanimated';
 // import { createAnimatedComponent } from 'react-native-reanimated/lib/typescript/createAnimatedComponent';
 
 export default function LogIn() {
@@ -11,13 +11,13 @@ export default function LogIn() {
   const width = Dimensions.get('window').width;
   const height = Dimensions.get('window').height;
 
-  const [show,setShow] = useState<any>(false);
+  const [show, setShow] = useState<any>(false);
 
   const { navigate } = useNavigation<any>();
   return (
     <Animated.View entering={FadeInLeft.delay(200).duration(400)} style={[styles.container, { backgroundColor: isDark ? 'black' : 'white', }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={{flex:1,height:height - height * 0.11,paddingTop:width * 0.3}}>
+        <View style={{ flex: 1, height: height - height * 0.11, paddingTop: width * 0.3 }}>
           <Animated.Text entering={FadeInLeft.delay(200).duration(400)} style={styles.Text}>Log In</Animated.Text>
           <Text style={{ opacity: 0.5, color: isDark ? 'white' : 'black', fontSize: 18, fontWeight: '500', textAlign: 'center' }}>Welcome to Company Name</Text>
           <View style={{ width: width - 40, marginTop: 50, marginHorizontal: 'auto' }}>
@@ -62,54 +62,56 @@ export default function LogIn() {
                   backgroundColor: 'white'
                 }}
               />
-              <TouchableOpacity style={{position: 'absolute', right: '8%',}} onPress={()=>setShow(!show)}>
-              {
-                !show? (
-                  <Image
-                    source={require('../assets/Images/eyeSeen.png')}
-                    style={{ width: 22, height: 15.5, }}
-                  />
-                ) : (
-                  <Image
-                    source={require('../assets/Images/eyeHide.png')}
-                    style={{ width: 22, height: 15.5, }}
-                  />
-                )
-              }
-                </TouchableOpacity>
+              <TouchableOpacity style={{ position: 'absolute', right: '8%', }} onPress={() => setShow(!show)}>
+                {
+                  !show ? (
+                    <Image
+                      source={require('../assets/Images/eyeSeen.png')}
+                      style={{ width: 22, height: 15.5, }}
+                    />
+                  ) : (
+                    <Image
+                      source={require('../assets/Images/eyeHide.png')}
+                      style={{ width: 22, height: 15.5, }}
+                    />
+                  )
+                }
+              </TouchableOpacity>
             </View>
             <TouchableOpacity>
               <Text style={{ width: '90%', marginHorizontal: 'auto', marginLeft: 25, marginTop: 10, fontSize: 14, fontWeight: '600' }}>Forget Password?</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.BTN}  onPressOut={()=>  navigate('Verifications')}>
+          <TouchableOpacity style={styles.BTN} onPressOut={() => navigate('Verifications')}>
             <Text style={{ color: 'white', fontSize: 24, fontWeight: '600', }}>Log In</Text>
           </TouchableOpacity>
 
-          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-around'}}>
+          <Animated.View entering={FadeInLeft.damping(12).springify().duration(400).delay(600)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
             <TouchableOpacity>
               <Image
-              source={{uri:'https://img.icons8.com/?size=48&id=17949&format=png'}}
-              style={{
-                width: 50,
-                height: 50,
-                marginLeft: 20
-              }}
+                source={{ uri: 'https://img.icons8.com/?size=48&id=17949&format=png' }}
+                style={{
+                  width: 50,
+                  height: 50,
+                  marginLeft: 20,
+                  borderRadius:100
+                }}
               />
             </TouchableOpacity>
             <TouchableOpacity>
               <Image
-              source={{uri:'https://img.icons8.com/?size=48&id=uLWV5A9vXIPu&format=png'}}
-              style={{
-                width: 50,
-                height: 50,
-                marginLeft: 20
-              }}
+                source={{ uri: 'https://img.icons8.com/?size=48&id=uLWV5A9vXIPu&format=png' }}
+                style={{
+                  width: 50,
+                  height: 50,
+                  marginLeft: 20,
+                  borderRadius:100
+                }}
               />
             </TouchableOpacity>
-          </View>
+          </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ position: 'absolute', bottom: 0, width: '100%' }}>
+          <Animated.View entering={FadeInDown.delay(400).duration(600).springify()} style={{ position: 'absolute', bottom: 0, width: '100%' }}>
             <TouchableOpacity style={[styles.BTNs]} onPress={() => navigate('SingIn')}>
               <Text style={{ color: '#3F74FD', fontSize: 22, fontWeight: '400', }}>Create New Account</Text>
             </TouchableOpacity>

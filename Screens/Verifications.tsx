@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, useColorScheme, TextInput, Dimensions, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, useColorScheme, TextInput, Dimensions, TouchableOpacity,  } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native';
+import Animated, { FadeInLeft } from 'react-native-reanimated';
 const width = Dimensions.get('window').width;
 
 export default function Verifications() {
@@ -10,9 +11,10 @@ export default function Verifications() {
     const inputs = useRef<Array<TextInput | null>>([]);
     const [focus, setFocus] = useState('')
     const { goBack,replace} = useNavigation<any>();
+    const AnimationBtn = Animated.createAnimatedComponent(TouchableOpacity);
     const handleInputChange = (text: string, index: number) => {
         if (text.length === 1 && index < inputs.current.length - 1) {
-            inputs.current[index + 1]?.focus();
+            inputs.current[index + 1]?.focus(); 
         }
     };
 
@@ -24,18 +26,19 @@ export default function Verifications() {
     };
     return (
         <SafeAreaView style={{ backgroundColor: isDark ? 'black' : '#fff', flex: 1,padding:15}}>
-            <TouchableOpacity onPress={() => goBack()}>
+            <AnimationBtn entering={FadeInLeft.delay(100).duration(400).damping(12).springify()} onPress={() => goBack()}>
                 <Ionicons name='chevron-back' size={36} color={isDark ? 'white' : 'black'} />
-            </TouchableOpacity>
+            </AnimationBtn>
             <View style={styles.container}>
-                <Text style={styles.TextMain}>Verify Your Number</Text>
-                <Text style={[styles.Descreption, { color: isDark ? 'white' : 'black' }]}>Enter the otp code here</Text>
-                <View style={styles.MainFlex}>
+                <Animated.Text entering={FadeInLeft.delay(300).duration(700).damping(12).springify()} style={styles.TextMain}>Verify Your Number</Animated.Text>
+                <Animated.Text entering={FadeInLeft.delay(300).duration(700).damping(12).springify()} style={[styles.Descreption, { color: isDark ? 'white' : 'black' }]}>Enter the otp code here</Animated.Text>
+                <Animated.View entering={FadeInLeft.delay(300).duration(600).damping(12).springify()} style={styles.MainFlex}>
                     {
                         [...Array(6)].map((el, inx) => {
                             return (
                                 <View style={[styles.Inputs, { borderColor: isDark ? 'white' : 'black' }]} key={inx}>
                                     <TextInput
+                                       
                                         textContentType="oneTimeCode"
                                         keyboardType='number-pad'
                                         maxLength={1}
@@ -49,8 +52,8 @@ export default function Verifications() {
                             )
                         })
                     }
-                </View>
-                <TouchableOpacity>
+                </Animated.View>
+                <AnimationBtn entering={FadeInLeft.delay(300).duration(700).damping(12).springify()}>
                     <Text style={{
                         textDecorationLine: "underline",
                         opacity: 0.5,
@@ -60,10 +63,10 @@ export default function Verifications() {
                         marginTop: width * 0.1,
                         color: isDark ? 'white' : 'black'
                     }}>Resend?</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.BTN} onPress={()=>replace('Bottom')}>
+                </AnimationBtn>
+                <AnimationBtn entering={FadeInLeft.delay(300).duration(700).damping(12).springify()} style={styles.BTN} onPress={()=>replace('Bottom')}>
                     <Text style={styles.BTNText}>Continue</Text>
-                </TouchableOpacity>
+                </AnimationBtn>
             </View>
         </SafeAreaView>
     )
