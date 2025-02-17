@@ -44,7 +44,6 @@ export default function Verifications() {
                                         maxLength={1}
                                         onKeyPress={(e) => handleKeyPress(e, inx)}
                                         ref={(ref) => (inputs.current[inx] = ref)}
-                                        onFocus={() => setFocus(inx.toString())}
                                         onChangeText={(text: any) => handleInputChange(text, inx)}
                                         style={{ width: '100%', height: '100%', textAlign: 'center', fontSize: 28 }}
                                     />

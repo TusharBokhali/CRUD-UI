@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "356223715807",
+    "project_id": "reels-demo-a9f25",
+    "storage_bucket": "reels-demo-a9f25.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:356223715807:android:a73ba4833f224770185c6a",
+        "android_client_info": {
+          "package_name": "com.reelsgram"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDD0GOg1xaN5SVuaUzLQPJ32_JPBtFk_Qw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

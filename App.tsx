@@ -16,7 +16,7 @@ export default function App() {
     return (
     <NavigationContainer>
       <StatusBar backgroundColor={isDark ? 'black' : 'white'} barStyle={isDark ? 'light-content' : 'dark-content'}/>
-    <Stack.Navigator initialRouteName='Bottom' screenOptions={{headerShown:false}}>
+    <Stack.Navigator initialRouteName='LogIn' screenOptions={{headerShown:false}}>
       <Stack.Screen name='LogIn' component={LogIn}/>
       <Stack.Screen name='SingIn' component={SingIn}/>
       <Stack.Screen name='Verifications' component={Verifications}/>

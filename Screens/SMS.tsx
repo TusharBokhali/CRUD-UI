@@ -1,13 +1,15 @@
-import { View, Text, StyleSheet, useColorScheme, Touchable, TouchableOpacity, Image, Dimensions, TextInput, Pressable, Animated } from 'react-native'
+import { View, Text, StyleSheet, useColorScheme, Touchable, TouchableOpacity, Image, Dimensions, TextInput, Pressable, Animated, Scro, TouchableOpacityllView, Modal } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { Link, useNavigation } from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import ContentLoader, { Rect, Circle, Path } from "react-content-loader/native"
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { measure } from 'react-native-reanimated';
+import { AutoScrollFlatList } from "react-native-autoscroll-flatlist";
 const width = Dimensions.get('window').width;
 export default function SMS() {
     const animation = useRef(new Animated.Value(0)).current;
@@ -18,37 +20,46 @@ export default function SMS() {
     const [focuse, setFocus] = useState<boolean>(false)
     const [chatData, setChatData] = useState<any[]>([])
     const { goBack } = useNavigation<any>();
+    const [showModal, setShowModal] = useState<boolean>(false)
 
     let show = [...chatData];
     const date = new Date();
     const OnMeassege = () => {
-        let data = {
-            title: massage,
-            time: ()=>{
-                let hour = date.getHours();
-                let second = date.getMinutes();
-                let datas = {
-                    hour:hour,
-                    second:second
-                }
-                return datas
-            },
+        if (massage.length) {
+            setShowModal(false)
+
+            let data = {
+                title: massage,
+                time: (() => {
+                    let minute = date.getMinutes()
+                    let hour = date.getHours()
+                    console.log(minute);
+
+                    let obj = {
+                        hours: hour,
+                        minu: minute
+                    }
+                    return obj;
+                })(),
+            }
+            show.push(data);
+            setChatData(show);
+        } else {
+            setShowModal(true)
+            setTimeout(() => {
+                setShowModal(false)
+            }, 3000)
         }
-        console.log(data.time);
-        
-        show.push(data);
-        setChatData(show);
         setMassge('');
     }
-
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity onPress={goBack}>
+                    <AnimationBTn onPress={goBack}>
                         <Ionicons name='chevron-back' size={24} color={isDark ? 'white' : 'black'} />
-                    </TouchableOpacity>
+                    </AnimationBTn>
                     <View style={{ flexDirection: "row", alignItems: 'center', gap: 10 }}>
                         <Image
                             source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDDpy_pcfKg5nerCjf-g9HG7f5NNBfAk3LS7wNmRlOU7looHAEL6KIFBI&s' }}
@@ -65,32 +76,56 @@ export default function SMS() {
                     </View>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-                    <TouchableOpacity>
+                    <AnimationBTn>
                         <AntDesign name='videocamera' size={24} color={isDark ? 'white' : 'black'} />
-                    </TouchableOpacity>
-                    <TouchableOpacity>
+                    </AnimationBTn>
+                    <AnimationBTn>
                         <MaterialCommunityIcons name='phone-outline' size={24} color={isDark ? 'white' : 'black'} />
-                    </TouchableOpacity>
-                    <TouchableOpacity>
+                    </AnimationBTn>
+                    <AnimationBTn>
                         <MaterialIcons name='more-vert' size={24} color={isDark ? 'white' : 'black'} />
-                    </TouchableOpacity>
+                    </AnimationBTn>
                 </View>
             </View>
 
+
+
             {/* Center Part */}
+
             {
                 show?.length ? (
-                    show.map((el, inx) => {
-                        return (
-                            <View style={styles.ChatMain} key={inx}>
-                                <Text style={styles.chatTExt}>{el.title}</Text>
-                            </View>
-                        )
-                    })
+                    // show.map((el, inx) => {
+                    //     return (
+                    //         <View style={styles.ChatMain} key={inx}>
+                    //             <Text style={styles.chatTExt}>{el.title}</Text>
+                    //             <Text style={styles.Time}>{`${el.time.hours}:${el.time.minu}`}</Text>
+                    //         </View>
+                    //     )
+                    // })
+                    <AutoScrollFlatList
+                        showsVerticalScrollIndicator={false}
+                        showScrollToEndIndicator={false}
+                        contentContainerStyle={{ paddingBottom: 50 }}
+                        data={show}
+                        keyExtractor={({ index }) => index}
+                        renderItem={({ item, index }) => {
+                            return (
+                                <View style={styles.ChatMain} key={index}>
+                                    <Text style={styles.chatTExt}>{item.title}</Text>
+                                    <Text style={styles.Time}>{`${item.time.hours}:${item.time.minu}`}</Text>
+                                </View>
+                            )
+                        }}
+                    />
                 ) : (
-                    <Text>No chat</Text>
+                    <Text style={{
+                        textAlign: 'center',
+                        marginTop: 20,
+                        fontWeight: '500',
+                    }}>No chat</Text>
                 )
             }
+
             {/* Last Chating Keyboard Fix Position Part */}
             <View style={styles.Positions}>
                 <Pressable style={[styles.InputsMain, { width: '80%' }]}>
@@ -100,14 +135,15 @@ export default function SMS() {
                         alignItems: 'center',
                         gap: 15
                     }}>
-                        <TouchableOpacity style={{ width: '10%' }}>
+                        <AnimationBTn style={{ width: '10%' }}>
                             <Image
                                 source={require('../assets/Images/smile.png')}
                                 style={{ width: 25, height: 25 }}
                             />
-                        </TouchableOpacity>
+                        </AnimationBTn>
                         <View style={{ width: '80%' }}>
                             <TextInput
+                                // returnKeyLabel='Send'    
                                 placeholder='Message'
                                 returnKeyType='send'
                                 value={massage}
@@ -121,10 +157,9 @@ export default function SMS() {
                         width: '38%',
                         flexDirection: 'row',
                         alignItems: 'center',
-                        gap: 10
+                        gap: 5
                     }}>
                         <AnimationBTn>
-
                             <Image
                                 source={require('../assets/Images/Attech.png')}
                                 style={{
@@ -138,7 +173,7 @@ export default function SMS() {
                                 null
                             ) : (
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                    <TouchableOpacity>
+                                    <AnimationBTn>
 
                                         <Image
                                             source={require('../assets/Images/rupee.png')}
@@ -147,9 +182,9 @@ export default function SMS() {
                                                 height: 25
                                             }}
                                         />
-                                    </TouchableOpacity>
+                                    </AnimationBTn>
 
-                                    <TouchableOpacity>
+                                    <AnimationBTn>
 
                                         <Image
                                             source={require('../assets/Images/camera.png')}
@@ -158,7 +193,7 @@ export default function SMS() {
                                                 height: 25
                                             }}
                                         />
-                                    </TouchableOpacity>
+                                    </AnimationBTn>
                                 </View>
                             )
                         }
@@ -166,21 +201,38 @@ export default function SMS() {
                     </View>
                 </Pressable>
                 <View style={{ width: '15%' }}>
-                    <View style={styles.Circle}>
+                    <AnimationBTn style={styles.Circle} onPressIn={() => massage.length ? OnMeassege() : ''}>
                         {
                             massage.length ?
-                                <TouchableOpacity onPressIn={OnMeassege}>
+                                <AnimationBTn onPressIn={OnMeassege}>
                                     <Ionicons name='send' size={24} color={'white'} />
-                                </TouchableOpacity>
+                                </AnimationBTn>
 
                                 :
-                                <TouchableOpacity >
+                                <AnimationBTn >
                                     <FontAwesome6 name='microphone' size={24} color={'white'} />
-                                </TouchableOpacity>
+                                </AnimationBTn>
                         }
-                    </View>
+                    </AnimationBTn>
                 </View>
             </View>
+            <Modal
+                visible={showModal}
+                animationType="slide"
+                transparent={true}
+
+            ><View style={styles.MainModal}>
+                    <Image
+                        source={require('../assets/Images/Whatsaap.png')}
+                        style={{
+                            width: 18,
+                            height: 18,
+                            borderRadius: 20
+                        }}
+                    />
+                    <Text style={styles.ModalTEXT}>Can't send empty message</Text>
+                </View>
+            </Modal>
         </SafeAreaView>
     )
 }
@@ -210,25 +262,27 @@ const styles = StyleSheet.create({
         elevation: 5,
         borderRadius: 100,
         paddingVertical: 2,
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         backgroundColor: 'white',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        maxWidth: '80%',
 
     },
     ChatMain: {
+        maxWidth: '85%',
         backgroundColor: '#685814',
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         borderBottomLeftRadius: 10,
+        // borderBottomRightRadius:10,
         alignSelf: 'flex-end',
-        paddingVertical: 5,
-        paddingHorizontal: 15,
-        marginVertical: 10
+        paddingVertical: 2,
+        paddingHorizontal: 10,
+        marginVertical: 10,
     },
     chatTExt: {
-        width: '15%',
         fontSize: 16,
         fontWeight: '500',
         color: '#FFF'
@@ -240,5 +294,32 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    Time: {
+        fontSize: 12,
+        color: 'white',
+        fontWeight: '500',
+        textAlign: 'right',
+        alignSelf: 'flex-end',
+    },
+    MainModal: {
+        flexDirection: 'row', gap: 10,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        elevation: 10,
+        paddingHorizontal: 10,
+        marginHorizontal: 'auto',
+        justifyContent: 'center',
+        paddingVertical: 5,
+        position: 'absolute',
+        bottom: 20,
+        alignSelf: 'center'
+    },
+    ModalTEXT: {
+        fontWeight: '500',
+        fontSize: 14
+    },
+    Skeleton: {
+        // backgroundColor:'#685814',
     }
 })

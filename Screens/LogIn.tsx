@@ -1,19 +1,56 @@
 /* eslint-disable react-native/no-inline-styles */
 import { View, Text, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { shadow, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, FadeInLeft } from 'react-native-reanimated';
 // import { createAnimatedComponent } from 'react-native-reanimated/lib/typescript/createAnimatedComponent';
+// import auth, { getAuth } from '@firebase/auth';
+import { collection, onSnapshot } from 'firebase/firestore';
+import db from '../firebase.config';
 
+import Loader from './Loader';
+import 'firebase/compat/auth'
+import { getApp, getApps } from 'firebase/app';
 export default function LogIn() {
   const isDark = useColorScheme() === 'dark';
   const width = Dimensions.get('window').width;
   const height = Dimensions.get('window').height;
-
+  const [Loading,setLoading] = useState<boolean>(false);
   const [show, setShow] = useState<any>(false);
-
+  const [data,setData] = useState<any>({});
+  const [Alluser,setAlluser] =useState<any>();
   const { navigate } = useNavigation<any>();
+  console.log("auth",getApps);
+
+  // useEffect(()=>{
+  //   const ref = collection(db, "users")
+  //   onSnapshot(ref, (QuerySnapshot) => {
+  //     const users:any = []
+  //     QuerySnapshot.forEach((doc) => {
+  //       users.push({ id: doc.id, ...doc.data() })
+  //     })
+  //     setAlluser(users)
+  //     console.log(users)
+  //   })
+  // },[])
+  
+  const LoginHandle =async ()=>{
+    // setLoading(true);
+    // let pass = '';
+    // if(data.email.includes('@')){
+    //   Alluser.forEach((e:any) => {
+    //     if(e?.email === data.email){
+    //       pass = e.password;
+    //       return true;
+    //     }
+    //     if(pass == data.pass){
+    //       navigate('Bottom');
+    //     }
+    //   });
+    // }
+  }
+
   return (
     <Animated.View entering={FadeInLeft.delay(200).duration(400)} style={[styles.container, { backgroundColor: isDark ? 'black' : 'white', }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -27,7 +64,8 @@ export default function LogIn() {
               placeholder="Phone or Email"
               outlineColor={isDark ? 'gray' : 'black'}
               activeOutlineColor={isDark ? '#000000' : 'black'}
-
+              value={data.email}
+              onChangeText={(value)=> setData({...data,email:value})}
               outlineStyle={{
                 borderRadius: 15,
                 borderWidth: 1,
@@ -53,6 +91,9 @@ export default function LogIn() {
                   borderWidth: 1,
                   width: '100%',
                 }}
+                keyboardType='number-pad'
+                value={data.number}
+              onChangeText={(value)=> setData({...data,number:value})}
                 secureTextEntry={show}
                 style={{
                   width: '100%',
@@ -82,8 +123,11 @@ export default function LogIn() {
               <Text style={{ width: '90%', marginHorizontal: 'auto', marginLeft: 25, marginTop: 10, fontSize: 14, fontWeight: '600' }}>Forget Password?</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.BTN} onPressOut={() => navigate('Verifications')}>
+          <TouchableOpacity disabled={Loading} style={styles.BTN} onPressIn={LoginHandle}>
+            {
+              Loading ? <Loader /> :
             <Text style={{ color: 'white', fontSize: 24, fontWeight: '600', }}>Log In</Text>
+            }
           </TouchableOpacity>
 
           <Animated.View entering={FadeInLeft.damping(12).springify().duration(400).delay(600)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>

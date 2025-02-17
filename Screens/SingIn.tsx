@@ -1,22 +1,74 @@
 /* eslint-disable quotes */
 /* eslint-disable jsx-quotes */
 /* eslint-disable react-native/no-inline-styles */
-import { View, Text, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, Alert } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Animated, { FadeInDown, FadeInLeft, FadeInUp } from 'react-native-reanimated';
+import db from '..//firebase.config'
+import { addDoc, collection, onSnapshot } from 'firebase/firestore';
+import Loader from './Loader';
+
 
 export default function SingIn() {
   const isDark = useColorScheme() === 'dark';
   const width = Dimensions.get('window').width;
   const height = Dimensions.get('window').height;
-  const [show, setShow] = useState<any>(false);
+  const [show, setShow] = useState<boolean>(false);
   const { goBack } = useNavigation<any>();
 
+  const [data, setData] = useState<any>({})
+  const [loader, setLoader] = useState(false)
+
   const AnimationBtn = Animated.createAnimatedComponent(TouchableOpacity)
-  
+
+  let demoTimeOut:any;
+
+  useEffect(() => {
+    const ref = collection(db, "users")
+    onSnapshot(ref, (QuerySnapshot) => {
+      const users:any = []
+      QuerySnapshot.forEach((doc) => {
+        users.push({ id: doc.id, ...doc.data() })
+      })
+      console.log(users)
+    })
+
+    return () => {
+      if(demoTimeOut){
+        clearInterval(demoTimeOut)
+      }
+    }
+  }, [])
+
+  const submitHandler = async () => {
+    console.log("data::", data)
+    setLoader(true)
+    addDoc(collection(db, "users"), data)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((error) => {
+        console.log(error);
+        if(error.code === 'auth/email-already-in-use'){
+          Alert.alert('That email address is already in use!')
+        }
+      })
+      .finally(() => {
+        demoTimeOut = setTimeout(() => {
+          setLoader(false)
+        }, 1000)
+      })
+
+
+    // collection(db, "users").id().delete()
+    // deleteDoc(collection(db, "users", id))
+
+    // updateDoc(collection(db, "users", id), {...newData})
+  }
+
   return (
     <ScrollView>
       <View style={[styles.container, { backgroundColor: isDark ? 'black' : 'white', height: height }]}>
@@ -46,6 +98,8 @@ export default function SingIn() {
                 marginTop: 20,
                 backgroundColor: 'white'
               }}
+              value={data.name}
+              onChangeText={(value) => setData({ ...data, name: value })}
             />
 
             <TextInput
@@ -67,6 +121,8 @@ export default function SingIn() {
                 marginTop: 20,
                 backgroundColor: 'white'
               }}
+              value={data.phonenumber}
+              onChangeText={(value) => setData({ ...data, phonenumber: value })}
             />
 
             <TextInput
@@ -89,6 +145,8 @@ export default function SingIn() {
                 backgroundColor: 'white'
 
               }}
+              value={data.email}
+              onChangeText={(value) => setData({ ...data, email: value })}
             />
             <View style={{ flexDirection: 'row', alignItems: 'center', position: 'relative', marginTop: 20 }}>
               <TextInput
@@ -110,8 +168,9 @@ export default function SingIn() {
                   fontWeight: "700",
                   paddingLeft: 10,
                   backgroundColor: 'white'
-
                 }}
+                value={data.password}
+                onChangeText={(value) => setData({ ...data, password: value })}
               />
               <TouchableOpacity style={{ position: 'absolute', right: '8%', }}
                 onPress={() => setShow(!show)}>
@@ -132,8 +191,11 @@ export default function SingIn() {
             </View>
 
           </Animated.View>
-          <AnimationBtn entering={FadeInDown.delay(600).duration(600).damping(12).springify()} style={styles.BTN} >
+          <AnimationBtn disabled={loader} onPress={submitHandler} entering={FadeInDown.delay(600).duration(600).springify()} style={styles.BTN} >
+            {
+              loader ? <Loader /> :
             <Text style={{ color: 'white', fontSize: 24, fontWeight: '600', }}>Sign Up</Text>
+            }
           </AnimationBtn>
           <Animated.View entering={FadeInDown.delay(700).duration(600).damping(12).springify()} style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
             <Text style={{ fontWeight: '600' }}>Already Have Account?</Text>
