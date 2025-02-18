@@ -9,6 +9,8 @@ import { useNavigation } from '@react-navigation/native'
 import { addDoc, collection, onSnapshot } from 'firebase/firestore'
 import db from '../firebase.config'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import ContentLoader, { Rect, Circle, Path } from "react-content-loader/native"
+import Loader from './Loader'
 export default function Chats() {
   const isDark = useColorScheme() === 'dark';
   const { navigate } = useNavigation<any>();
@@ -76,9 +78,11 @@ export default function Chats() {
           />
         </View>
         {
-          Alluser.map((el, inx) => {
-            return (
-              <TouchableOpacity style={styles.User} key={inx} onPress={() => navigate('SMS', { user: el })}>
+          Alluser.length ? (
+
+            Alluser.map((el, inx) => {
+              return (
+                <TouchableOpacity style={styles.User} key={inx} onPress={() => navigate('SMS', { user: el })}>
                 <View style={{
                   width: '15%'
                 }}>
@@ -89,7 +93,7 @@ export default function Chats() {
                       height: 60,
                       borderRadius: 70
                     }}
-                  />
+                    />
                 </View>
                 <View style={{ width: '85%', paddingHorizontal: 15 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
@@ -105,9 +109,12 @@ export default function Chats() {
               </TouchableOpacity>
             )
           })
+        ) : (
+          <Loader />
+        )
         }
-      </ScrollView>
-      <TouchableOpacity style={styles.AddFixedAI}>
+        </ScrollView>
+        <TouchableOpacity style={styles.AddFixedAI}>
         <Image
           source={require('../assets/Images/MetaAi.png')}
           style={{

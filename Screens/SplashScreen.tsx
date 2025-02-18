@@ -10,8 +10,8 @@ export default function SplashScreen() {
         let GetUser = async() =>{
           try {
             let data = await  AsyncStorage.getItem('user');
-            let user = JSON.stringify(data);
-            if(user){
+            let user = JSON.parse(data);
+            if(user!==null && user !==""){
               replace('Bottom');
             }else{
                 replace('LogIn');

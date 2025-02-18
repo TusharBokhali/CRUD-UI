@@ -40,8 +40,6 @@ export default function LogIn() {
   
   const LoginHandle =async ()=>{
     setLoading(true);
-    console.log("Check")
-    let pass = '';
     if(data.email.includes('@')){
       const q = query(collection(db, "users"), where("email", "==", data.email));
       let user:any = null
@@ -55,6 +53,14 @@ export default function LogIn() {
         Alert.alert("Email not found")
       } else if(user?.password == data.password){
         // redirect 
+        let store = async(user:any)=>{
+          try {
+            await AsyncStorage.setItem('user',JSON.stringify(user))
+          } catch (error) {
+            console.log(error); 
+          }
+        }
+        store(user)
         Alert.alert("Logn SuccessFully");
         replace('Bottom');
       } else {
@@ -77,7 +83,7 @@ export default function LogIn() {
         Alert.alert("Login SuccessFully");
         let store = async(user:any)=>{
           try {
-            await AsyncStorage.setItem('user',JSON.parse(user))
+            await AsyncStorage.setItem('user',JSON.stringify(user))
           } catch (error) {
             console.log(error); 
           }
