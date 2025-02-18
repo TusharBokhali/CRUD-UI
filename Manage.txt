@@ -1,0 +1,32 @@
+{
+message: "asdasd",
+sender: id,
+receiver: id,
+time: "",
+read: false
+}
+
+       //     setShowModal(false)
+
+        //     let data = {
+        //         title: massage,
+        //         time: (() => {
+        //             let minute = date.getMinutes()
+        //             let hour = date.getHours()
+        //             console.log(minute);
+
+        //             let obj = {
+        //                 hours: hour,
+        //                 minu: minute
+        //             }
+        //             return obj;
+        //         })(),
+        //     }
+        //     show.push(data);
+        //     setChatData(show);
+        // } else {
+        //     setShowModal(true)
+        //     setTimeout(() => {
+        //         setShowModal(false)
+        //     }, 3000)
+        // }

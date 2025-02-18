@@ -1,17 +1,18 @@
 /* eslint-disable react-native/no-inline-styles */
-import { View, Text, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, } from 'react-native'
+import { View, Text, useColorScheme, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, Alert, } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { shadow, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, FadeInLeft } from 'react-native-reanimated';
 // import { createAnimatedComponent } from 'react-native-reanimated/lib/typescript/createAnimatedComponent';
 // import auth, { getAuth } from '@firebase/auth';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import db from '../firebase.config';
-
+import { getAuth } from "firebase/auth";
 import Loader from './Loader';
 import 'firebase/compat/auth'
 import { getApp, getApps } from 'firebase/app';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function LogIn() {
   const isDark = useColorScheme() === 'dark';
   const width = Dimensions.get('window').width;
@@ -20,11 +21,13 @@ export default function LogIn() {
   const [show, setShow] = useState<any>(false);
   const [data,setData] = useState<any>({});
   const [Alluser,setAlluser] =useState<any>();
-  const { navigate } = useNavigation<any>();
-  console.log("auth",getApps);
+  const { navigate,replace } = useNavigation<any>();
+  // console.log("auth",getAuth());
+  
 
   // useEffect(()=>{
-  //   const ref = collection(db, "users")
+
+    const ref = collection(db, "users")
   //   onSnapshot(ref, (QuerySnapshot) => {
   //     const users:any = []
   //     QuerySnapshot.forEach((doc) => {
@@ -36,19 +39,57 @@ export default function LogIn() {
   // },[])
   
   const LoginHandle =async ()=>{
-    // setLoading(true);
-    // let pass = '';
-    // if(data.email.includes('@')){
-    //   Alluser.forEach((e:any) => {
-    //     if(e?.email === data.email){
-    //       pass = e.password;
-    //       return true;
-    //     }
-    //     if(pass == data.pass){
-    //       navigate('Bottom');
-    //     }
-    //   });
-    // }
+    setLoading(true);
+    console.log("Check")
+    let pass = '';
+    if(data.email.includes('@')){
+      const q = query(collection(db, "users"), where("email", "==", data.email));
+      let user:any = null
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        user = {id: doc.id, ...doc.data()}
+      });
+      if(!user){
+        Alert.alert("Email not found")
+      } else if(user?.password == data.password){
+        // redirect 
+        Alert.alert("Logn SuccessFully");
+        replace('Bottom');
+      } else {
+        Alert.alert("Password wrong!")
+        console.log(data.password);
+        
+      }
+      setLoading(false);
+    }else{
+      console.log("Mobile")
+      const q = query(collection(db, "users"), where("phonenumber", "==", data.number));
+      let user:any = null
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc)=>{
+        user = {id:doc.id,...doc.data()}
+      })
+      if(!user){
+        Alert.alert('Account not found');
+      }else if(user.password == data.password){
+        Alert.alert("Login SuccessFully");
+        let store = async(user:any)=>{
+          try {
+            await AsyncStorage.setItem('user',JSON.parse(user))
+          } catch (error) {
+            console.log(error); 
+          }
+        }
+        store(user)
+        replace('Bottom');
+        console.log("user Moble" , user);
+      }else{
+        Alert.alert('Password not cuurect!');
+      }
+      setLoading(false);
+    }
   }
 
   return (
@@ -61,6 +102,7 @@ export default function LogIn() {
             <TextInput
               mode="outlined"
               label="Phone or Email"
+              textContentType='emailAddress'
               placeholder="Phone or Email"
               outlineColor={isDark ? 'gray' : 'black'}
               activeOutlineColor={isDark ? '#000000' : 'black'}
@@ -83,6 +125,7 @@ export default function LogIn() {
               <TextInput
                 mode="outlined"
                 label="Password"
+                maxLength={10}
                 placeholder="Password"
                 outlineColor={isDark ? 'gray' : 'black'}
                 activeOutlineColor={isDark ? '#000000' : 'black'}
@@ -93,7 +136,7 @@ export default function LogIn() {
                 }}
                 keyboardType='number-pad'
                 value={data.number}
-              onChangeText={(value)=> setData({...data,number:value})}
+              onChangeText={(value)=> setData({...data,password:value})}
                 secureTextEntry={show}
                 style={{
                   width: '100%',

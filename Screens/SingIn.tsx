@@ -27,18 +27,19 @@ export default function SingIn() {
   let demoTimeOut:any;
 
   useEffect(() => {
-    const ref = collection(db, "users")
-    onSnapshot(ref, (QuerySnapshot) => {
-      const users:any = []
-      QuerySnapshot.forEach((doc) => {
-        users.push({ id: doc.id, ...doc.data() })
-      })
-      console.log(users)
-    })
+    // const ref = collection(db, "users")
+    // onSnapshot(ref, (QuerySnapshot) => {
+    //   const users:any = []
+    //   QuerySnapshot.forEach((doc) => {
+    //     users.push({ id: doc.id, ...doc.data() })
+    //   })
+    //   console.log(users)
+    // })
 
     return () => {
       if(demoTimeOut){
         clearInterval(demoTimeOut)
+        
       }
     }
   }, [])

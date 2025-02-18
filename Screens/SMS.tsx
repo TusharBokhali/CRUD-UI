@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, useColorScheme, Touchable, TouchableOpacity, Image, Dimensions, TextInput, Pressable, Animated, Scro, TouchableOpacityllView, Modal } from 'react-native'
-import React, { useRef, useState } from 'react'
+import { View, Text, StyleSheet, useColorScheme, Touchable, TouchableOpacity, Image, Dimensions, TextInput, Pressable, Animated, Scro, TouchableOpacityllView, Modal, Alert } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import { Link, useNavigation } from '@react-navigation/native';
+import { Link, useNavigation, useRoute } from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import ContentLoader, { Rect, Circle, Path } from "react-content-loader/native"
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6'
@@ -10,6 +10,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { measure } from 'react-native-reanimated';
 import { AutoScrollFlatList } from "react-native-autoscroll-flatlist";
+import { addDoc, collection } from 'firebase/firestore';
+import db from '../firebase.config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const width = Dimensions.get('window').width;
 export default function SMS() {
     const animation = useRef(new Animated.Value(0)).current;
@@ -21,34 +24,69 @@ export default function SMS() {
     const [chatData, setChatData] = useState<any[]>([])
     const { goBack } = useNavigation<any>();
     const [showModal, setShowModal] = useState<boolean>(false)
+    // const [userChatMassage, setuserChatMassage] = useState<string>('');
+    const [currentUser, setCurrentUser] = useState<any>();
+    const [ChatDataFire, setChatDataFire] = useState<any>();
 
+    const Route = useRoute<any>();
+    const User = Route.params.user;
     let show = [...chatData];
     const date = new Date();
+
+    useEffect(() => {
+        const GeCurentyUser = async () => {
+            try {
+                let data = await AsyncStorage.getItem('user');
+                let user = JSON.stringify(data);
+                console.log("user", data)
+                setCurrentUser(user)
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        GeCurentyUser();
+    }, [])
+
+
+    console.log(currentUser);
+
     const OnMeassege = () => {
         if (massage.length) {
             setShowModal(false)
+            // console.log("chatDataMassageFire" , massage);
+            // const chatDataMassageFire = {
+            //     message: massage,
+            //     sender: currentUser.id,
+            //     receiver: User.id,
+            //     time: (() => {
+            //         let minute = date.getMinutes()
+            //         let hour = date.getHours()
+            //         let obj = {
+            //             hours: hour,
+            //             minu: minute
+            //         }
+            //         return obj;
+            //     })(),
+            //     read: false
+            // }
 
-            let data = {
-                title: massage,
-                time: (() => {
-                    let minute = date.getMinutes()
-                    let hour = date.getHours()
-                    console.log(minute);
+            // const MassgeCreateFire = (chatDataMassageFire:any) => {
+            //     console.log("data::", chatDataMassageFire)
+            //     // setLoade(true)
+            //     addDoc(collection(db, "message"), chatDataMassageFire)
+            //         .then((res) => {
+            //             console.log(res);
+            //             // setChatDataFire()
+            //         })
+            //         .catch((error) => {
+            //             console.log(error);
+            //             if (error.code === 'auth/email-already-in-use') {
+            //                 Alert.alert('That email address is already in use!')
+            //             }
+            //         })
 
-                    let obj = {
-                        hours: hour,
-                        minu: minute
-                    }
-                    return obj;
-                })(),
-            }
-            show.push(data);
-            setChatData(show);
-        } else {
-            setShowModal(true)
-            setTimeout(() => {
-                setShowModal(false)
-            }, 3000)
+            // }
+            // MassgeCreateFire(chatDataMassageFire)
         }
         setMassge('');
     }
@@ -70,7 +108,7 @@ export default function SMS() {
                             }}
                         />
                         <View style={{}}>
-                            <Text style={{ fontWeight: '600' }}>Rajesh Singh</Text>
+                            <Text style={{ fontWeight: '600' }}>{User.name}</Text>
                             <Text style={{ opacity: 0.5, fontSize: 12 }}>last seen today at 5:20</Text>
                         </View>
                     </View>

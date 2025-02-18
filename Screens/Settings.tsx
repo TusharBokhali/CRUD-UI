@@ -3,10 +3,24 @@ import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useNavigation } from '@react-navigation/native'
 export default function Settings() {
   const isDark = useColorScheme() === 'dark';
   const [isEnabled, setIsEnabled] = useState(false);
+  const { navigate,replace } = useNavigation<any>();
+
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
+    let GetUser = async() =>{
+      try {
+        AsyncStorage.clear();
+        replace('LogIn');
+      } catch (error) {
+        console.log(error);
+      }
+    }
+ 
   return (
     <SafeAreaView style={[styles.container,{backgroundColor:isDark ? 'black' : 'white'}]}>
       <Text style={[styles.Title,{color:isDark ? 'white' : 'black'}]}>Settings</Text>
@@ -45,7 +59,7 @@ export default function Settings() {
          value={isEnabled}
         />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.BTN}>
+      <TouchableOpacity style={styles.BTN} onPressIn={GetUser}>
         <Text style={{fontSize:18,fontWeight:'600',color:'white',textAlign:'center'}}>Log Out</Text>
       </TouchableOpacity>
     </SafeAreaView>
