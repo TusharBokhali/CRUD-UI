@@ -24,21 +24,62 @@ export default function SMS() {
     const [chatData, setChatData] = useState<any[]>([])
     const { goBack } = useNavigation<any>();
     const [showModal, setShowModal] = useState<boolean>(false)
-    // const [userChatMassage, setuserChatMassage] = useState<string>('');
     const [currentUser, setCurrentUser] = useState<any>();
     const [ChatDataFire, setChatDataFire] = useState<any[]>([]);
-
+    const [Typing,setTyping] = useState(false)
     const Route = useRoute<any>();
     const User = Route.params.user;
-    let show = [...chatData];
-    const date = new Date();
+    const getChatAppMassageUser = async () => {
+        try {
+            const q = query(collection(db, "message"), or(
+                where("receiver", "==", User.id),
+                where("sender", "==", User.id)
+            ), orderBy('createdAt'))
+            console.log("hello");
+            const querySnapshot = await getDocs(q);
+            let array: any = []
+            querySnapshot.forEach((doc) => {
+                array.push(doc.data())
+            })
+            setChatDataFire(array)
+        } catch (error) {
+            console.log("error", error)
+        }
+    }
+
+
+    const OnMeassege = () => {
+
+        if (massage.length) {
+            setShowModal(false)
+            const chatDataMassageFire = {
+                message: massage,
+                sender: currentUser.id,
+                receiver: User.id,
+                createdAt: serverTimestamp(),
+                read: false
+            }
+            const MassgeCreateFire = (chatDataMassageFire: any) => {
+                addDoc(collection(db, "message"), chatDataMassageFire)
+                .then((res) => {
+                        getChatAppMassageUser();
+                        setTyping(!Typing)
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    })
+            }
+            // getChatAppMassageUser();4
+            MassgeCreateFire(chatDataMassageFire);
+        }
+        setMassge('');
+    }
 
     useEffect(() => {
         const GeCurentyUser = async () => {
             try {
                 let data = await AsyncStorage.getItem('user');
                 let user = JSON.parse(data as never);
-                // console.log("user", data)
                 setCurrentUser(user)
             } catch (error) {
                 console.log(error);
@@ -47,63 +88,6 @@ export default function SMS() {
         GeCurentyUser();
         getChatAppMassageUser()
     }, [])
-
-    const getChatAppMassageUser = async () => {
-        try {
-            const q = query(collection(db, "message"), or(
-                where("receiver", "==", User.id),
-                where("sender", "==", User.id)
-            ), orderBy('createdAt'))
-            const querySnapshot = await getDocs(q);
-            let array: any = []
-            querySnapshot.forEach((doc) => {
-                array.push(doc.data())
-                // console.log(doc.data());
-                // array.push(doc.data())
-            })
-            setChatDataFire(array)
-            console.log("querySnapshot", array);
-        } catch (error) {
-            console.log("error", error)
-        }
-    }
-
-    // console.log("currentUser",ChatDataFire[0].message);
-
-    const OnMeassege = () => {
-        if (massage.length) {
-            setShowModal(false)
-            // console.log("chatDataMassageFire" , massage);
-            const chatDataMassageFire = {
-                message: massage,
-                sender: currentUser.id,
-                receiver: User.id,
-                createdAt: serverTimestamp(),
-                read: false
-            }
-
-            const MassgeCreateFire = (chatDataMassageFire: any) => {
-                console.log("data::", chatDataMassageFire)
-                // setLoade(true)
-                addDoc(collection(db, "message"), chatDataMassageFire)
-                    .then((res) => {
-                        // console.log(res);
-                        // setChatDataFire()
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                        // if (error.code === 'auth/email-already-in-use') {
-                        //     Alert.alert('That email address is already in use!')
-                        // }
-                    })
-
-            }
-            MassgeCreateFire(chatDataMassageFire)
-            getChatAppMassageUser()
-        }
-        setMassge('');
-    }
-
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
@@ -145,14 +129,6 @@ export default function SMS() {
 
             {
                 ChatDataFire?.length ? (
-                    // show.map((el, inx) => {
-                    //     return (
-                    //         <View style={styles.ChatMain} key={inx}>
-                    //             <Text style={styles.chatTExt}>{el.title}</Text>
-                    //             <Text style={styles.Time}>{`${el.time.hours}:${el.time.minu}`}</Text>
-                    //         </View>
-                    //     )
-                    // })
                     <AutoScrollFlatList
                         showsVerticalScrollIndicator={false}
                         showScrollToEndIndicator={false}
@@ -169,7 +145,7 @@ export default function SMS() {
                                         borderBottomLeftRadius: 10,
                                     }]} key={index}>
                                         <Text style={styles.chatTExt}>{item.message}</Text>
-                                        {/* <Text style={styles.Time}>{`${item.time.hours}:${item.time.minu}`}</Text> */}
+                                        {/* <Text style={styles.Time}>{`${item.createdAt}`}</Text> */}
                                     </View>
                                 ) : (
                                     <View style={[styles.ChatMain, {

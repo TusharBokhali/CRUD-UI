@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import Animated, { FadeInDown, FadeInLeft, FadeInUp } from 'react-native-reanimated';
 import db from '..//firebase.config'
-import { addDoc, collection, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import Loader from './Loader';
 
 
@@ -17,7 +17,7 @@ export default function SingIn() {
   const width = Dimensions.get('window').width;
   const height = Dimensions.get('window').height;
   const [show, setShow] = useState<boolean>(false);
-  const { goBack } = useNavigation<any>();
+  const { goBack,navigate } = useNavigation<any>();
 
   const [data, setData] = useState<any>({})
   const [loader, setLoader] = useState(false)
@@ -45,14 +45,17 @@ export default function SingIn() {
   }, [])
 
   const submitHandler = async () => {
-    if(data.name && data.email && data.password && data.phonenumber){
+    if(data.name && data.email && data.password && data.phonenumber && data.email.includes('@')){
 
       console.log("data::", data)
       setLoader(true)
-      addDoc(collection(db, "users"), data)
-      .then((res) => {
-        console.log(res);
-        setData('')
+      // const q = query(collection(db, "users"), where("email", "!=", data.email));
+      // const querySnapshot = await getDocs(q);
+        addDoc(collection(db, "users"), data)
+        .then((res) => {
+          setData("")
+          Alert.alert('Account SuccessFully Create!');
+          navigate('LogIn')
       })
       .catch((error) => {
         console.log(error);
@@ -60,11 +63,12 @@ export default function SingIn() {
           Alert.alert('That email address is already in use!')
         }
       })
-      .finally(() => {
-        demoTimeOut = setTimeout(() => {
-          setLoader(false)
-        }, 1000)
-      })
+   
+      // .finally(() => {
+      //   demoTimeOut = setTimeout(() => {
+      //     setLoader(false)
+      //   }, 1000)
+      // })
     }else{
       Alert.alert('Enter Valid fied');
     }
@@ -79,13 +83,13 @@ export default function SingIn() {
   return (
     <ScrollView>
       <View style={[styles.container, { backgroundColor: isDark ? 'black' : 'white', height: height }]}>
-        <AnimationBtn entering={FadeInLeft.delay(200).duration(600).damping(12).springify()} onPress={() => goBack()}>
+        <AnimationBtn  onPress={() => goBack()} style={{marginTop:20}}>
           <Ionicons name='chevron-back' size={36} color={isDark ? 'white' : 'black'} />
         </AnimationBtn>
-        <View style={[styles.Main, { marginTop: '30%' }]}>
-          <Animated.Text entering={FadeInUp.delay(300).duration(600).damping(12).springify()} style={styles.Text}>Sign Up</Animated.Text>
-          <Animated.Text entering={FadeInUp.delay(400).duration(600).damping(12).springify()} style={{ opacity: 0.5, color: isDark ? 'white' : 'black', fontSize: 18, fontWeight: '500', textAlign: 'center' }}>Welcome to Company Name</Animated.Text>
-          <Animated.View entering={FadeInUp.delay(500).duration(600).damping(12).springify()} style={{ width: width - 40, marginTop: 30, marginHorizontal: 'auto' }}>
+        <View style={[{ marginTop: '30%' }]}>
+          <Animated.Text entering={FadeInUp.delay(300).duration(600).springify()} style={styles.Text}>Sign Up</Animated.Text>
+          <Animated.Text entering={FadeInUp.delay(400).duration(600).springify()} style={{ opacity: 0.5, color: isDark ? 'white' : 'black', fontSize: 18, fontWeight: '500', textAlign: 'center' }}>Welcome to Company Name</Animated.Text>
+          <Animated.View entering={FadeInUp.delay(500).duration(600).springify()} style={{ width: width - 40, marginTop: 30, marginHorizontal: 'auto' }}>
             <TextInput
               mode="outlined"
               label="Name"
@@ -113,6 +117,7 @@ export default function SingIn() {
               mode="outlined"
               label="Phone Number"
               placeholder="Phone Number"
+              keyboardType='number-pad'
               outlineColor={isDark ? 'gray' : 'black'}
               activeOutlineColor={isDark ? '#000000' : 'black'}
               outlineStyle={{
@@ -136,6 +141,8 @@ export default function SingIn() {
               mode="outlined"
               label="Email"
               placeholder="Email"
+              keyboardType='email-address'
+              
               outlineColor={isDark ? 'gray' : 'black'}
               activeOutlineColor={isDark ? '#000000' : 'black'}
               outlineStyle={{
@@ -149,8 +156,7 @@ export default function SingIn() {
                 fontWeight: "700",
                 paddingLeft: 10,
                 marginTop: 20,
-                backgroundColor: 'white'
-
+                backgroundColor: 'white',
               }}
               value={data.email}
               onChangeText={(value) => setData({ ...data, email: value })}
@@ -160,6 +166,7 @@ export default function SingIn() {
                 mode="outlined"
                 label="Password"
                 placeholder="Password"
+                
                 secureTextEntry={show}
                 outlineColor={isDark ? 'gray' : 'black'}
                 activeOutlineColor={isDark ? '#000000' : 'black'}
@@ -198,13 +205,13 @@ export default function SingIn() {
             </View>
 
           </Animated.View>
-          <AnimationBtn disabled={loader} onPress={submitHandler} entering={FadeInDown.delay(600).duration(600).springify()} style={styles.BTN} >
+          <AnimationBtn disabled={loader} onPress={submitHandler} style={styles.BTN} >
             {
               loader ? <Loader /> :
             <Text style={{ color: 'white', fontSize: 24, fontWeight: '600', }}>Sign Up</Text>
             }
           </AnimationBtn>
-          <Animated.View entering={FadeInDown.delay(700).duration(600).damping(12).springify()} style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
+          <Animated.View entering={FadeInDown.delay(700).duration(600).springify()} style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
             <Text style={{ fontWeight: '600' }}>Already Have Account?</Text>
             <AnimationBtn onPress={() => goBack()}>
               <Text style={{ textDecorationLine: 'underline', color: '#3F74FD', fontWeight: '600', fontSize: 14, marginLeft: 5 }}>Log In</Text>
@@ -222,9 +229,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 15,
     // justifyContent: 'center',
-  },
-  Main: {
-
   },
   Text: {
     color: '#3F74FD',

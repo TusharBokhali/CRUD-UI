@@ -18,19 +18,35 @@ export default function Chats() {
   const { navigate } = useNavigation<any>();
   const [Alluser, setAlluser] = useState<any[]>([]);
   // const [currentUser,setCurrentUser] = useState<any>();
-  const [userChatMassage,setuserChatMassage] = useState<string>('');
-  const [ChatDataFire,setChatDataFire] = useState<any>();
-  const currentUser = useContext(CurrentUsers)
- 
+  const [userChatMassage, setuserChatMassage] = useState<string>('');
+  const [ChatDataFire, setChatDataFire] = useState<any>();
+  const [currentUser, setCurrentUser] = useState()
+
+  // // useEffect(() => {
+
+  // // }, []);
+
+
   useEffect(() => {
     const ref = collection(db, "users")
-    onSnapshot(ref, (QuerySnapshot) => {
+    onSnapshot(ref, async (QuerySnapshot) => {
       const users: any = [];
-      QuerySnapshot.forEach((doc) => {
-        users.push({ id: doc.id, ...doc.data() })
-      })
-      // console.log(users)
-      setAlluser(users);
+      let userData;
+      try {
+        let data = await AsyncStorage.getItem('user');
+        userData = JSON.parse(data as never);
+        setCurrentUser(userData)
+      } catch (error) {
+        console.log(error);
+      }
+      if (userData && userData!=='') {
+        QuerySnapshot.forEach((doc) => {
+          if(userData.id !== doc.id)
+          users.push({ id: doc.id, ...doc.data() })
+        })
+        // console.log(users)
+        setAlluser(users);
+      }
     })
   }, []);
   // console.log(Alluser);
@@ -72,38 +88,38 @@ export default function Chats() {
             Alluser.map((el, inx) => {
               return (
                 <TouchableOpacity style={styles.User} key={inx} onPress={() => navigate('SMS', { user: el })}>
-                <View style={{
-                  width: '15%'
-                }}>
-                  <Image
-                    source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDDpy_pcfKg5nerCjf-g9HG7f5NNBfAk3LS7wNmRlOU7looHAEL6KIFBI&s' }}
-                    style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: 70
-                    }}
+                  <View style={{
+                    width: '15%'
+                  }}>
+                    <Image
+                      source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDDpy_pcfKg5nerCjf-g9HG7f5NNBfAk3LS7wNmRlOU7looHAEL6KIFBI&s' }}
+                      style={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: 70
+                      }}
                     />
-                </View>
-                <View style={{ width: '85%', paddingHorizontal: 15 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
-                    <Text>{el.name}</Text>
-                    <Text style={{ opacity: 0.5 }}>Time</Text>
                   </View>
-                  <Text style={{
-                    opacity: 0.5,
-                    fontWeight: '500'
-                  }}>Good Mornning 😊</Text>
-                </View>
+                  <View style={{ width: '85%', paddingHorizontal: 15 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
+                      <Text>{el.name}</Text>
+                      <Text style={{ opacity: 0.5 }}>Time</Text>
+                    </View>
+                    <Text style={{
+                      opacity: 0.5,
+                      fontWeight: '500'
+                    }}>Good Mornning 😊</Text>
+                  </View>
 
-              </TouchableOpacity>
-            )
-          })
-        ) : (
-          <Loader />
-        )
+                </TouchableOpacity>
+              )
+            })
+          ) : (
+            <Loader />
+          )
         }
-        </ScrollView>
-        <TouchableOpacity style={styles.AddFixedAI}>
+      </ScrollView>
+      <TouchableOpacity style={styles.AddFixedAI}>
         <Image
           source={require('../assets/Images/MetaAi.png')}
           style={{

@@ -16,44 +16,44 @@ import SplashScreen from './Screens/SplashScreen';
 import { CurrentUsers } from './hooks/UseContext';
 export default function App() {
   const Stack = createNativeStackNavigator();
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [user,setUser] = useState(null);
   const isDark = useColorScheme() === 'dark';
   // const {replace} = useNavigation<any>();
-  let userData = ''
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        let data = await AsyncStorage.getItem('user');
-         userData = data ? JSON.parse(data) : null;
-         setUser(userData)
-       console.log(userData);
-      } catch (error) {
-        console.log(error);
-      }
-      finally {
-        setLoading(false);
-      }
-    };
+  // let userData = ''
+  // // useEffect(() => {
+  // //   const fetchUser = async () => {
+  // //     try {
+  // //       let data = await AsyncStorage.getItem('user');
+  // //        userData = data ? JSON.parse(data) : null;
+  // //        setUser(userData)
+  // //      console.log(userData);
+  // //     } catch (error) {
+  // //       console.log(error);
+  // //     }
+  // //     finally {
+  // //       setLoading(false);
+  // //     }
+  // //   };
 
-    fetchUser();
-  }, []);
+  // //   fetchUser();
+  // // }, []);
 
-  if (loading) {
-    return <Text>Loading...</Text>; // You can use a custom splash screen here
-  }
+  // if (loading) {
+  //   return <Text>Loading...</Text>; // You can use a custom splash screen here
+  // }
  
-  const data = "static"
+  // const data = "static"
   // console.log("userApp",data);
-  console.log("data userApp",user);
+  // console.log("data userApp",user);
 
 
   return (
     <>
-        {loading ? '':
+        
           <NavigationContainer>
-          <StatusBar backgroundColor={isDark ? 'black' : 'white'} barStyle={isDark ? 'light-content' : 'dark-content'} />
-          <CurrentUsers.Provider value={user}>
+          <StatusBar backgroundColor='transparent' translucent={true} barStyle={isDark ? 'light-content' : 'dark-content'} />
+          {/* <CurrentUsers.Provider value={user}> */}
             <Stack.Navigator initialRouteName='SplashScreen' screenOptions={{ headerShown: false }}>
               <Stack.Screen name='LogIn' component={LogIn} />
               <Stack.Screen name='SingIn' component={SingIn} />
@@ -62,9 +62,9 @@ export default function App() {
               <Stack.Screen name='SMS' component={SMS} />
               <Stack.Screen name='SplashScreen' component={SplashScreen} />
             </Stack.Navigator>
-          </CurrentUsers.Provider>
+          {/* </CurrentUsers.Provider> */}
         </NavigationContainer>
-        }
+      
     </>
   )
 }

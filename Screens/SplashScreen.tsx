@@ -6,14 +6,27 @@ import { CurrentUsers } from '../hooks/UseContext';
 
 export default function SplashScreen() {
       const { navigate,replace } = useNavigation<any>();
-      const user = useContext(CurrentUsers)
-      // const [user,setUser] = useState(CurrentUsers)
-      console.log("CurrentUsers",user);
-      if(user!=='' && user!==null){
-        replace('Bottom');
-      }else{
-        replace('LogIn');
+      // const user = useContext(CurrentUsers)
+      const [user,setUser] = useState(CurrentUsers)
+      useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        let data = await AsyncStorage.getItem('user');
+         let userData =  JSON.parse(data as never);
+        if(userData){
+          replace('Bottom')
+        }else{
+          replace('LogIn');
+        }
+       console.log(userData);
+      } catch (error) {
+        console.log(error);
       }
+      
+    };
+
+    fetchUser();
+  }, []);
   return (
     <View style={styles.container}>
       <Image 
