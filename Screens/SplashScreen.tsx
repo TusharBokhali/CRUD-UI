@@ -1,28 +1,19 @@
 import { View, Text, StyleSheet, Image } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { CurrentUsers } from '../hooks/UseContext';
 
 export default function SplashScreen() {
       const { navigate,replace } = useNavigation<any>();
-    
-    useEffect(()=>{
-        let GetUser = async() =>{
-          try {
-            let data = await  AsyncStorage.getItem('user');
-            let user = JSON.parse(data);
-            if(user!==null && user !==""){
-              replace('Bottom');
-            }else{
-                replace('LogIn');
-            }
-          } catch (error) {
-            console.log(error);
- 
-          }
-        }
-        GetUser();
-      },[])
+      const user = useContext(CurrentUsers)
+      // const [user,setUser] = useState(CurrentUsers)
+      console.log("CurrentUsers",user);
+      if(user!=='' && user!==null){
+        replace('Bottom');
+      }else{
+        replace('LogIn');
+      }
   return (
     <View style={styles.container}>
       <Image 

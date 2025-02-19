@@ -10,7 +10,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { measure } from 'react-native-reanimated';
 import { AutoScrollFlatList } from "react-native-autoscroll-flatlist";
-import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, where, Timestamp, serverTimestamp, or, orderBy } from 'firebase/firestore';
 import db from '../firebase.config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const width = Dimensions.get('window').width;
@@ -26,7 +26,7 @@ export default function SMS() {
     const [showModal, setShowModal] = useState<boolean>(false)
     // const [userChatMassage, setuserChatMassage] = useState<string>('');
     const [currentUser, setCurrentUser] = useState<any>();
-    const [ChatDataFire, setChatDataFire] = useState<any []>([]);
+    const [ChatDataFire, setChatDataFire] = useState<any[]>([]);
 
     const Route = useRoute<any>();
     const User = Route.params.user;
@@ -37,8 +37,8 @@ export default function SMS() {
         const GeCurentyUser = async () => {
             try {
                 let data = await AsyncStorage.getItem('user');
-                let user = JSON.parse(data);
-                console.log("user", data)
+                let user = JSON.parse(data as never);
+                // console.log("user", data)
                 setCurrentUser(user)
             } catch (error) {
                 console.log(error);
@@ -48,17 +48,24 @@ export default function SMS() {
         getChatAppMassageUser()
     }, [])
 
-    const getChatAppMassageUser = async() =>{
-        const q = query(collection(db, "message"), where("receiver", "==", User.id));
-        const querySnapshot = await getDocs(q);
-        // console.log("querySnapshot",querySnapshot.docs.);
-        let array:any = []
-        querySnapshot.forEach((doc)=>{
-            array.push(doc.data())
-            console.log(doc.data());
-            // array.push(doc.data())
-        })
-        setChatDataFire(array)
+    const getChatAppMassageUser = async () => {
+        try {
+            const q = query(collection(db, "message"), or(
+                where("receiver", "==", User.id),
+                where("sender", "==", User.id)
+            ), orderBy('createdAt'))
+            const querySnapshot = await getDocs(q);
+            let array: any = []
+            querySnapshot.forEach((doc) => {
+                array.push(doc.data())
+                // console.log(doc.data());
+                // array.push(doc.data())
+            })
+            setChatDataFire(array)
+            console.log("querySnapshot", array);
+        } catch (error) {
+            console.log("error", error)
+        }
     }
 
     // console.log("currentUser",ChatDataFire[0].message);
@@ -71,19 +78,11 @@ export default function SMS() {
                 message: massage,
                 sender: currentUser.id,
                 receiver: User.id,
-                time: (() => {
-                    let minute = date.getMinutes()
-                    let hour = date.getHours()
-                    let obj = {
-                        hours: hour,
-                        minu: minute
-                    }
-                    return obj;
-                })(),
+                createdAt: serverTimestamp(),
                 read: false
             }
 
-            const MassgeCreateFire = (chatDataMassageFire:any) => {
+            const MassgeCreateFire = (chatDataMassageFire: any) => {
                 console.log("data::", chatDataMassageFire)
                 // setLoade(true)
                 addDoc(collection(db, "message"), chatDataMassageFire)
@@ -93,9 +92,9 @@ export default function SMS() {
                     })
                     .catch((error) => {
                         console.log(error);
-                        if (error.code === 'auth/email-already-in-use') {
-                            Alert.alert('That email address is already in use!')
-                        }
+                        // if (error.code === 'auth/email-already-in-use') {
+                        //     Alert.alert('That email address is already in use!')
+                        // }
                     })
 
             }
@@ -159,27 +158,30 @@ export default function SMS() {
                         showScrollToEndIndicator={false}
                         contentContainerStyle={{ paddingBottom: 50 }}
                         data={ChatDataFire}
-                        keyExtractor={({ index }) => index}
+                        keyExtractor={(item, index: number) => `${index}`}
                         renderItem={({ item, index }) => {
                             // console.log("item",item.message);
-                            
                             return (
-                                User.id === ChatDataFire[0].sender ? (
-                                    <View style={[styles.ChatMain,{alignSelf:'flex-end', borderTopLeftRadius: 10,
+                                currentUser.id === ChatDataFire[index].sender ? (
+                                    <View style={[styles.ChatMain, {
+                                        alignSelf: 'flex-end', borderTopLeftRadius: 10,
                                         borderTopRightRadius: 10,
-                                        borderBottomLeftRadius: 10,}]} key={index}>
-                                    <Text style={styles.chatTExt}>{item.message}</Text>
-                                    <Text style={styles.Time}>{`${item.time.hours}:${item.time.minu}`}</Text>
-                                </View>
+                                        borderBottomLeftRadius: 10,
+                                    }]} key={index}>
+                                        <Text style={styles.chatTExt}>{item.message}</Text>
+                                        {/* <Text style={styles.Time}>{`${item.time.hours}:${item.time.minu}`}</Text> */}
+                                    </View>
                                 ) : (
-                                    <View style={[styles.ChatMain,{alignSelf:'flex-start', borderTopLeftRadius: 10,
+                                    <View style={[styles.ChatMain, {
+                                        alignSelf: 'flex-start', borderTopLeftRadius: 10,
                                         borderTopRightRadius: 10,
-                                        borderBottomRightRadius: 10,}]} key={index}>
-                                    <Text style={styles.chatTExt}>{item.message}</Text>
-                                    <Text style={styles.Time}>{`${item.time.hours}:${item.time.minu}`}</Text>
-                                </View>
+                                        borderBottomRightRadius: 10,
+                                    }]} key={index}>
+                                        <Text style={styles.chatTExt}>{item.message}</Text>
+                                        {/* <Text style={styles.Time}>{`${item.time.hours}:${item.time.minu}`}</Text> */}
+                                    </View>
                                 )
-                               
+
                             )
                         }}
                     />
@@ -310,8 +312,9 @@ const styles = StyleSheet.create({
     },
     Positions: {
         width: width * 0.95,
+        backgroundColor: 'white',
         position: 'absolute',
-        bottom: 20,
+        bottom: 10,
         alignSelf: 'center',
         flexDirection: 'row',
         alignItems: 'center',
@@ -339,12 +342,12 @@ const styles = StyleSheet.create({
     ChatMain: {
         maxWidth: '85%',
         backgroundColor: '#685814',
-       
+
         // borderBottomRightRadius:10,
         // alignSelf: 'flex-end',
-        paddingVertical: 2,
+        paddingVertical: 5,
         paddingHorizontal: 10,
-        marginVertical: 10,
+        marginVertical: 5,
     },
     chatTExt: {
         fontSize: 16,

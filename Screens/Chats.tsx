@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, useColorScheme, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Feather from 'react-native-vector-icons/Feather'
@@ -11,13 +11,16 @@ import db from '../firebase.config'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import ContentLoader, { Rect, Circle, Path } from "react-content-loader/native"
 import Loader from './Loader'
+import { CurrentUsers } from '../hooks/UseContext';
+
 export default function Chats() {
   const isDark = useColorScheme() === 'dark';
   const { navigate } = useNavigation<any>();
   const [Alluser, setAlluser] = useState<any[]>([]);
-  const [currentUser,setCurrentUser] = useState<any>();
+  // const [currentUser,setCurrentUser] = useState<any>();
   const [userChatMassage,setuserChatMassage] = useState<string>('');
   const [ChatDataFire,setChatDataFire] = useState<any>();
+  const currentUser = useContext(CurrentUsers)
  
   useEffect(() => {
     const ref = collection(db, "users")
@@ -29,22 +32,8 @@ export default function Chats() {
       // console.log(users)
       setAlluser(users);
     })
-
-    // const GeCurentyUser = async() =>{
-    //   try {
-    //     let data = await AsyncStorage.getItem('user');
-    //     let user = JSON.stringify(data);
-    //     setCurrentUser(user)
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // }
-    // GeCurentyUser();
   }, []);
-
- 
-
-  console.log(Alluser);
+  // console.log(Alluser);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>

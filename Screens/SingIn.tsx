@@ -45,11 +45,14 @@ export default function SingIn() {
   }, [])
 
   const submitHandler = async () => {
-    console.log("data::", data)
-    setLoader(true)
-    addDoc(collection(db, "users"), data)
+    if(data.name && data.email && data.password && data.phonenumber){
+
+      console.log("data::", data)
+      setLoader(true)
+      addDoc(collection(db, "users"), data)
       .then((res) => {
         console.log(res);
+        setData('')
       })
       .catch((error) => {
         console.log(error);
@@ -62,6 +65,9 @@ export default function SingIn() {
           setLoader(false)
         }, 1000)
       })
+    }else{
+      Alert.alert('Enter Valid fied');
+    }
 
 
     // collection(db, "users").id().delete()

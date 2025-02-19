@@ -79,7 +79,7 @@ export default function LogIn() {
       })
       if(!user){
         Alert.alert('Account not found');
-      }else if(user.password == data.password){
+      }else if(user.password === data.password){
         Alert.alert("Login SuccessFully");
         let store = async(user:any)=>{
           try {
