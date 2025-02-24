@@ -53,7 +53,6 @@ export default function App() {
         
           <NavigationContainer>
           <StatusBar backgroundColor='transparent' translucent={true} barStyle={isDark ? 'light-content' : 'dark-content'} />
-          {/* <CurrentUsers.Provider value={user}> */}
             <Stack.Navigator initialRouteName='SplashScreen' screenOptions={{ headerShown: false }}>
               <Stack.Screen name='LogIn' component={LogIn} />
               <Stack.Screen name='SingIn' component={SingIn} />
@@ -62,7 +61,6 @@ export default function App() {
               <Stack.Screen name='SMS' component={SMS} />
               <Stack.Screen name='SplashScreen' component={SplashScreen} />
             </Stack.Navigator>
-          {/* </CurrentUsers.Provider> */}
         </NavigationContainer>
       
     </>

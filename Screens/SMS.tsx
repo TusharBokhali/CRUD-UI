@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, useColorScheme, Touchable, TouchableOpacity, Image, Dimensions, TextInput, Pressable, Animated, Scro, TouchableOpacityllView, Modal, Alert } from 'react-native'
+import { View, Text, StyleSheet, useColorScheme, Touchable, TouchableOpacity, Image, Dimensions, TextInput, Pressable, Animated, Scro, TouchableOpacityllView, Modal, Alert, Keyboard } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -10,7 +10,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { measure } from 'react-native-reanimated';
 import { AutoScrollFlatList } from "react-native-autoscroll-flatlist";
-import { addDoc, collection, getDocs, query, where, Timestamp, serverTimestamp, or, orderBy } from 'firebase/firestore';
+import { addDoc, collection, getDocs, onSnapshot, query, where, Timestamp, serverTimestamp, or, orderBy } from 'firebase/firestore';
 import db from '../firebase.config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const width = Dimensions.get('window').width;
@@ -20,32 +20,34 @@ export default function SMS() {
     const isDark = useColorScheme() == 'dark';
     const [click, setClick] = useState(false);
     const [massage, setMassge] = useState<string>('');
-    const [focuse, setFocus] = useState<boolean>(false)
-    const [chatData, setChatData] = useState<any[]>([])
+    const [focuse, setFocus] = useState<boolean>(false);
+    const [chatData, setChatData] = useState<any[]>([]);
     const { goBack } = useNavigation<any>();
-    const [showModal, setShowModal] = useState<boolean>(false)
+    const [showModal, setShowModal] = useState<boolean>(false);
     const [currentUser, setCurrentUser] = useState<any>();
     const [ChatDataFire, setChatDataFire] = useState<any[]>([]);
-    const [Typing,setTyping] = useState(false)
+    const [Typing, setTyping] = useState(false);
+    const [KeyboardSet,setKeyboard]  = useState(false)
     const Route = useRoute<any>();
     const User = Route.params.user;
-    const getChatAppMassageUser = async () => {
-        try {
-            const q = query(collection(db, "message"), or(
-                where("receiver", "==", User.id),
-                where("sender", "==", User.id)
-            ), orderBy('createdAt'))
-            console.log("hello");
-            const querySnapshot = await getDocs(q);
-            let array: any = []
-            querySnapshot.forEach((doc) => {
-                array.push(doc.data())
-            })
-            setChatDataFire(array)
-        } catch (error) {
-            console.log("error", error)
-        }
-    }
+    // const getChatAppMassageUser = async () => {
+    //     try {
+    //         const q = query(collection(db, "message"), or(
+    //             where("receiver", "==", User.id),
+    //             where("sender", "==", User.id)
+    //         ), orderBy('createdAt'))
+    //         const querySnapshot = await getDocs(q);
+    //         let array: any = []
+    //         querySnapshot.forEach((doc) => {
+    //             array.push(doc.data())
+    //         })
+    //         setChatDataFire(array)
+    //         console.log("Array",array);
+            
+    //     } catch (error) {
+    //         console.log("error", error)
+    //     }
+    // }
 
 
     const OnMeassege = () => {
@@ -61,7 +63,7 @@ export default function SMS() {
             }
             const MassgeCreateFire = (chatDataMassageFire: any) => {
                 addDoc(collection(db, "message"), chatDataMassageFire)
-                .then((res) => {
+                    .then((res) => {
                         getChatAppMassageUser();
                         setTyping(!Typing)
                     })
@@ -86,8 +88,94 @@ export default function SMS() {
             }
         }
         GeCurentyUser();
-        getChatAppMassageUser()
+
+
+        const getChatAppMassageUser1 = async () => {
+            try {
+                const q = query(collection(db, "message"), or(
+                    where("receiver", "==", User.id),
+                    where("sender", "==", User.id)
+                ), orderBy('createdAt'))
+                console.log("hello");
+
+                onSnapshot(q, (snapshot) => {
+                    let array: any = []
+                    snapshot.forEach((doc) => {
+                        // doc.data() is never undefined for query doc snapshots
+                        array.push({ id: doc.id, ...doc.data() })
+                    });
+                    setChatDataFire(array)
+                })
+            } catch (error) {
+
+                console.log("error", error)
+            }
+        }
+        getChatAppMassageUser1();
+        const keyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow',
+            async() => {
+                setKeyboard(true); 
+                try {
+                    const q = query(collection(db, "message"), or(
+                        where("receiver", "==", User.id),
+                        where("sender", "==", User.id)
+                    ), orderBy('createdAt'))
+                    console.log("hello");
+            
+                    onSnapshot(q, (snapshot) => {
+                        let array: any = []
+                        snapshot.forEach((doc) => {
+                            // doc.data() is never undefined for query doc snapshots
+                            array.push({ id: doc.id, ...doc.data(),keyboard:true })
+                        });
+                        setChatDataFire(array)
+                        console.log("Array",array);
+        
+                    })
+                } catch (error) {
+            
+                    console.log("error", error)
+                }
+                
+            }
+          );
+          const keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            () => {
+                setKeyboard(false);
+                try {
+                    const q = query(collection(db, "message"), or(
+                        where("receiver", "==", User.id),
+                        where("sender", "==", User.id)
+                    ), orderBy('createdAt'))
+                    console.log("hello");
+            
+                    onSnapshot(q, (snapshot) => {
+                        let array: any = []
+                        snapshot.forEach((doc) => {
+                            // doc.data() is never undefined for query doc snapshots
+                            array.push({ id: doc.id, ...doc.data(),keyboard:false })
+                        });
+                        setChatDataFire(array)
+                        console.log("Array",array);
+        
+                    })
+                } catch (error) {
+            
+                    console.log("error", error)
+                } // or some other action
+            }
+          );
+          
     }, [])
+    // let keyboard;
+    // if(massage.length){
+    //      keyboard = true;
+    // }else{
+    //      keyboard = false;
+    // }
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
@@ -158,9 +246,13 @@ export default function SMS() {
                                     </View>
                                 )
 
+                                
+                                
+
                             )
                         }}
                     />
+                    
                 ) : (
                     <Text style={{
                         textAlign: 'center',
@@ -168,6 +260,21 @@ export default function SMS() {
                         fontWeight: '500',
                     }}>No chat</Text>
                 )
+            }
+            {
+                ChatDataFire[0]?.keyboard && !currentUser? (
+                    <View style={{
+                        width:70,
+                        borderRadius:10,
+                        height:100,
+                        backgroundColor:'gray'
+                    }}>
+                        <Text style={{
+                            color:'white',
+                            fontSize:16
+                        }}>Typing</Text>
+                    </View>
+                ) : null
             }
 
             {/* Last Chating Keyboard Fix Position Part */}
@@ -187,7 +294,6 @@ export default function SMS() {
                         </AnimationBTn>
                         <View style={{ width: '80%' }}>
                             <TextInput
-                                // returnKeyLabel='Send'    
                                 placeholder='Message'
                                 returnKeyType='send'
                                 value={massage}

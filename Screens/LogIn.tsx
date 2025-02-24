@@ -4,8 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { shadow, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, FadeInLeft } from 'react-native-reanimated';
-// import { createAnimatedComponent } from 'react-native-reanimated/lib/typescript/createAnimatedComponent';
-// import auth, { getAuth } from '@firebase/auth';
 import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import db from '../firebase.config';
 import { getAuth } from "firebase/auth";
@@ -13,6 +11,7 @@ import Loader from './Loader';
 import 'firebase/compat/auth'
 import { getApp, getApps } from 'firebase/app';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export default function LogIn() {
   const isDark = useColorScheme() === 'dark';
   const width = Dimensions.get('window').width;
@@ -22,22 +21,7 @@ export default function LogIn() {
   const [data,setData] = useState<any>({});
   const [Alluser,setAlluser] =useState<any>();
   const { navigate,replace } = useNavigation<any>();
-  // console.log("auth",getAuth());
-  
 
-  // useEffect(()=>{
-
-    const ref = collection(db, "users")
-  //   onSnapshot(ref, (QuerySnapshot) => {
-  //     const users:any = []
-  //     QuerySnapshot.forEach((doc) => {
-  //       users.push({ id: doc.id, ...doc.data() })
-  //     })
-  //     setAlluser(users)
-  //     console.log(users)
-  //   })
-  // },[])
-  
   const LoginHandle =async ()=>{
     setLoading(true);
     if(data.email.includes('@')){
@@ -45,7 +29,6 @@ export default function LogIn() {
       let user:any = null
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
         user = {id: doc.id, ...doc.data()}
       });
