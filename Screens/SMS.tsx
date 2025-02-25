@@ -47,8 +47,6 @@ export default function SMS() {
     //     } catch (error) {
     //         console.log("error", error)
     //     }
-    // }
-
 
     const OnMeassege = () => {
 
@@ -88,26 +86,21 @@ export default function SMS() {
             }
         }
         GeCurentyUser();
-
-
         const getChatAppMassageUser1 = async () => {
             try {
                 const q = query(collection(db, "message"), or(
                     where("receiver", "==", User.id),
                     where("sender", "==", User.id)
                 ), orderBy('createdAt'))
-                console.log("hello");
 
                 onSnapshot(q, (snapshot) => {
-                    let array: any = []
+                    let array: any = [];
                     snapshot.forEach((doc) => {
-                        // doc.data() is never undefined for query doc snapshots
                         array.push({ id: doc.id, ...doc.data() })
                     });
                     setChatDataFire(array)
                 })
             } catch (error) {
-
                 console.log("error", error)
             }
         }
@@ -126,7 +119,6 @@ export default function SMS() {
                     onSnapshot(q, (snapshot) => {
                         let array: any = []
                         snapshot.forEach((doc) => {
-                            // doc.data() is never undefined for query doc snapshots
                             array.push({ id: doc.id, ...doc.data(),keyboard:true })
                         });
                         setChatDataFire(array)
@@ -134,7 +126,6 @@ export default function SMS() {
         
                     })
                 } catch (error) {
-            
                     console.log("error", error)
                 }
                 
@@ -245,10 +236,6 @@ export default function SMS() {
                                         {/* <Text style={styles.Time}>{`${item.time.hours}:${item.time.minu}`}</Text> */}
                                     </View>
                                 )
-
-                                
-                                
-
                             )
                         }}
                     />
