@@ -38,8 +38,7 @@ export default function SingIn() {
 
     return () => {
       if(demoTimeOut){
-        clearInterval(demoTimeOut)
-        
+        clearInterval(demoTimeOut) 
       }
     }
   }, [])
@@ -52,6 +51,7 @@ export default function SingIn() {
       // const q = query(collection(db, "users"), where("email", "!=", data.email));
       // const querySnapshot = await getDocs(q);
         addDoc(collection(db, "users"), data)
+        
         .then((res) => {
           setData("")
           Alert.alert('Account SuccessFully Create!');

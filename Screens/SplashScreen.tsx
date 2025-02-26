@@ -18,7 +18,7 @@ export default function SplashScreen() {
         }else{
           replace('LogIn');
         }
-       console.log(userData);
+      //  console.log(userData);
       } catch (error) {
         console.log(error);
       }

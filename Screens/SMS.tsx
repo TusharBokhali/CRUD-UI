@@ -27,26 +27,9 @@ export default function SMS() {
     const [currentUser, setCurrentUser] = useState<any>();
     const [ChatDataFire, setChatDataFire] = useState<any[]>([]);
     const [Typing, setTyping] = useState(false);
-    const [KeyboardSet,setKeyboard]  = useState(false)
+    const [KeyboardSet, setKeyboard] = useState(false)
     const Route = useRoute<any>();
     const User = Route.params.user;
-    // const getChatAppMassageUser = async () => {
-    //     try {
-    //         const q = query(collection(db, "message"), or(
-    //             where("receiver", "==", User.id),
-    //             where("sender", "==", User.id)
-    //         ), orderBy('createdAt'))
-    //         const querySnapshot = await getDocs(q);
-    //         let array: any = []
-    //         querySnapshot.forEach((doc) => {
-    //             array.push(doc.data())
-    //         })
-    //         setChatDataFire(array)
-    //         console.log("Array",array);
-            
-    //     } catch (error) {
-    //         console.log("error", error)
-    //     }
 
     const OnMeassege = () => {
 
@@ -60,16 +43,14 @@ export default function SMS() {
                 read: false
             }
             const MassgeCreateFire = (chatDataMassageFire: any) => {
-                addDoc(collection(db, "message"), chatDataMassageFire)
+                addDoc(collection(db,"message"), chatDataMassageFire)
                     .then((res) => {
-                        getChatAppMassageUser();
                         setTyping(!Typing)
                     })
                     .catch((error) => {
                         console.log(error);
                     })
             }
-            // getChatAppMassageUser();4
             MassgeCreateFire(chatDataMassageFire);
         }
         setMassge('');
@@ -105,33 +86,34 @@ export default function SMS() {
             }
         }
         getChatAppMassageUser1();
+
         const keyboardDidShowListener = Keyboard.addListener(
             'keyboardDidShow',
-            async() => {
-                setKeyboard(true); 
+            async () => {
+                setKeyboard(true);
                 try {
                     const q = query(collection(db, "message"), or(
                         where("receiver", "==", User.id),
                         where("sender", "==", User.id)
                     ), orderBy('createdAt'))
                     console.log("hello");
-            
+
                     onSnapshot(q, (snapshot) => {
                         let array: any = []
                         snapshot.forEach((doc) => {
-                            array.push({ id: doc.id, ...doc.data(),keyboard:true })
+                            array.push({ id: doc.id, ...doc.data(), keyboard: true })
                         });
                         setChatDataFire(array)
-                        console.log("Array",array);
-        
+                        console.log("Array", array);
+
                     })
                 } catch (error) {
                     console.log("error", error)
                 }
-                
+
             }
-          );
-          const keyboardDidHideListener = Keyboard.addListener(
+        );
+        const keyboardDidHideListener = Keyboard.addListener(
             'keyboardDidHide',
             () => {
                 setKeyboard(false);
@@ -140,32 +122,24 @@ export default function SMS() {
                         where("receiver", "==", User.id),
                         where("sender", "==", User.id)
                     ), orderBy('createdAt'))
-                    console.log("hello");
-            
+
                     onSnapshot(q, (snapshot) => {
                         let array: any = []
                         snapshot.forEach((doc) => {
                             // doc.data() is never undefined for query doc snapshots
-                            array.push({ id: doc.id, ...doc.data(),keyboard:false })
+                            array.push({ id: doc.id, ...doc.data(), keyboard: false })
                         });
                         setChatDataFire(array)
-                        console.log("Array",array);
-        
+
                     })
                 } catch (error) {
-            
+
                     console.log("error", error)
                 } // or some other action
             }
-          );
-          
+        );
+
     }, [])
-    // let keyboard;
-    // if(massage.length){
-    //      keyboard = true;
-    // }else{
-    //      keyboard = false;
-    // }
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
@@ -239,7 +213,7 @@ export default function SMS() {
                             )
                         }}
                     />
-                    
+
                 ) : (
                     <Text style={{
                         textAlign: 'center',
@@ -249,19 +223,19 @@ export default function SMS() {
                 )
             }
             {
-                ChatDataFire[0]?.keyboard && !currentUser? (
-                    <View style={{
-                        width:70,
-                        borderRadius:10,
-                        height:100,
-                        backgroundColor:'gray'
-                    }}>
-                        <Text style={{
-                            color:'white',
-                            fontSize:16
-                        }}>Typing</Text>
-                    </View>
-                ) : null
+                // ChatDataFire[0]?.keyboard && ChatDataFire[0].sender!==currentUser.id? (
+                //     <View style={{
+                //         width: 70,
+                //         borderRadius: 10,
+                //         height: 100,
+                //         backgroundColor: 'gray'
+                //     }}>
+                //         <Text style={{
+                //             color: 'white',
+                //             fontSize: 16
+                //         }}>Typing</Text>
+                //     </View>
+                // ) : null
             }
 
             {/* Last Chating Keyboard Fix Position Part */}

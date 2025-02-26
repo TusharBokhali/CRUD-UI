@@ -6,7 +6,7 @@ import Feather from 'react-native-vector-icons/Feather'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { useNavigation } from '@react-navigation/native'
-import { addDoc, collection, onSnapshot } from 'firebase/firestore'
+import { addDoc, collection, doc, onSnapshot, updateDoc } from 'firebase/firestore'
 import db from '../firebase.config'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import ContentLoader, { Rect, Circle, Path } from "react-content-loader/native"
@@ -20,14 +20,13 @@ export default function Chats() {
   // const [currentUser,setCurrentUser] = useState<any>();
   const [userChatMassage, setuserChatMassage] = useState<string>('');
   const [ChatDataFire, setChatDataFire] = useState<any>();
-  const [currentUser, setCurrentUser] = useState()
-
-  // // useEffect(() => {
-
-  // // }, []);
+  const [currentUser, setCurrentUser] = useState<any>()
+  // const [userActive,setUserActive] = useState<boolean>(false)
 
 
   useEffect(() => {
+    // setUserActive(true)
+
     const ref = collection(db, "users")
     onSnapshot(ref, async (QuerySnapshot) => {
       const users: any = [];
@@ -35,21 +34,46 @@ export default function Chats() {
       try {
         let data = await AsyncStorage.getItem('user');
         userData = JSON.parse(data as never);
+        userData.Active = true;
+        // console.log("userData",userData);
+        const userRef = doc(db, "users", userData.id);
+        await updateDoc(userRef, userData)
+   // await addDoc(collection(db, "users"), [...user, { active: true }])
+                //     .then((res) => {
+                //         //   setData("")
+                //         console.log(res);
+
+                //     })
+    
         setCurrentUser(userData)
       } catch (error) {
         console.log(error);
       }
+   
       if (userData && userData!=='') {
         QuerySnapshot.forEach((doc) => {
+        
           if(userData.id !== doc.id)
-          users.push({ id: doc.id, ...doc.data() })
-        })
-        // console.log(users)
+          users.push({ id: doc.id, ...doc.data()})
+      })
+      // console.log(userData.id);
         setAlluser(users);
       }
     })
+
+
+    return () => {
+      console.log("currentUser uper");
+      
+      const CloseData = async()=>{
+        console.log("hello i am return down");
+        currentUser.Active = false
+        const userRef = doc(db, "users", currentUser.id);
+        return await updateDoc(userRef, currentUser)
+      }      
+      CloseData()
+    }
   }, []);
-  // console.log(Alluser);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
@@ -89,7 +113,8 @@ export default function Chats() {
               return (
                 <TouchableOpacity style={styles.User} key={inx} onPress={() => navigate('SMS', { user: el })}>
                   <View style={{
-                    width: '15%'
+                    width: '15%',
+                    flexDirection:'row',
                   }}>
                     <Image
                       source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDDpy_pcfKg5nerCjf-g9HG7f5NNBfAk3LS7wNmRlOU7looHAEL6KIFBI&s' }}
@@ -99,6 +124,19 @@ export default function Chats() {
                         borderRadius: 70
                       }}
                     />
+                    {
+                      // console.log(el)
+                      
+                      // el.Active ?  <View 
+                      // style={{
+                      //   width:10,
+                      //   height:10,
+                      //   borderRadius:50,
+                      //   backgroundColor:'green',
+                      //   position: 'absolute',
+                      // }}
+                      // /> : null
+                    }
                   </View>
                   <View style={{ width: '85%', paddingHorizontal: 15 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
