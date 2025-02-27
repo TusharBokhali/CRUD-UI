@@ -38,12 +38,7 @@ export default function Chats() {
         // console.log("userData",userData);
         const userRef = doc(db, "users", userData.id);
         await updateDoc(userRef, userData)
-   // await addDoc(collection(db, "users"), [...user, { active: true }])
-                //     .then((res) => {
-                //         //   setData("")
-                //         console.log(res);
-
-                //     })
+  
     
         setCurrentUser(userData)
       } catch (error) {
@@ -63,10 +58,7 @@ export default function Chats() {
 
 
     return () => {
-      console.log("currentUser uper");
-      
       const CloseData = async()=>{
-        console.log("hello i am return down");
         currentUser.Active = false
         const userRef = doc(db, "users", currentUser.id);
         return await updateDoc(userRef, currentUser)
@@ -74,6 +66,7 @@ export default function Chats() {
       CloseData()
     }
   }, []);
+console.log("AllUser:-",Alluser);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
@@ -146,7 +139,7 @@ export default function Chats() {
                     <Text style={{
                       opacity: 0.5,
                       fontWeight: '500'
-                    }}>Good Mornning 😊</Text>
+                    }}>{el.keyboard!==null ? "Typing..": "Good Mornning"}</Text>
                   </View>
 
                 </TouchableOpacity>

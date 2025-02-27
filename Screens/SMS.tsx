@@ -10,7 +10,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { measure } from 'react-native-reanimated';
 import { AutoScrollFlatList } from "react-native-autoscroll-flatlist";
-import { addDoc, collection, getDocs, onSnapshot, query, where, Timestamp, serverTimestamp, or, orderBy } from 'firebase/firestore';
+import { addDoc, collection, getDocs, onSnapshot, query, where, Timestamp, serverTimestamp, or, orderBy, and, doc, updateDoc } from 'firebase/firestore';
 import db from '../firebase.config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const width = Dimensions.get('window').width;
@@ -57,89 +57,71 @@ export default function SMS() {
     }
 
     useEffect(() => {
+        let user:any;
         const GeCurentyUser = async () => {
             try {
                 let data = await AsyncStorage.getItem('user');
-                let user = JSON.parse(data as never);
+             user = JSON.parse(data as never);
+                console.log("user",user);
                 setCurrentUser(user)
+                try {
+                    const q = query(collection(db, "message"), and(
+                        where("receiver", "==", User.id),
+                        where("sender", "==", user.id)
+                    ), orderBy('createdAt'))
+    
+                    onSnapshot(q, (snapshot) => {
+                        let array: any = [];
+                        snapshot.forEach((doc) => {
+                            array.push({ id: doc.id, ...doc.data() })
+                        });
+                        setChatDataFire(array)
+                    })
+                } catch (error) {
+                    console.log("error", error)
+                }
             } catch (error) {
                 console.log(error);
             }
         }
         GeCurentyUser();
-        const getChatAppMassageUser1 = async () => {
-            try {
-                const q = query(collection(db, "message"), or(
-                    where("receiver", "==", User.id),
-                    where("sender", "==", User.id)
-                ), orderBy('createdAt'))
-
-                onSnapshot(q, (snapshot) => {
-                    let array: any = [];
-                    snapshot.forEach((doc) => {
-                        array.push({ id: doc.id, ...doc.data() })
-                    });
-                    setChatDataFire(array)
-                })
-            } catch (error) {
-                console.log("error", error)
-            }
-        }
-        getChatAppMassageUser1();
 
         const keyboardDidShowListener = Keyboard.addListener(
             'keyboardDidShow',
-            async () => {
-                setKeyboard(true);
+           async()=>{
                 try {
-                    const q = query(collection(db, "message"), or(
-                        where("receiver", "==", User.id),
-                        where("sender", "==", User.id)
-                    ), orderBy('createdAt'))
-                    console.log("hello");
-
-                    onSnapshot(q, (snapshot) => {
-                        let array: any = []
-                        snapshot.forEach((doc) => {
-                            array.push({ id: doc.id, ...doc.data(), keyboard: true })
-                        });
-                        setChatDataFire(array)
-                        console.log("Array", array);
-
-                    })
+                    console.log("cuurentUser",user);
+                    
+                    const userRef = doc(db, "users", User.id);
+                    let update:any = {
+                        User,
+                         keyboard:user.id
+                     }
+                     await updateDoc(userRef, update)
                 } catch (error) {
-                    console.log("error", error)
+                    console.log(error);
                 }
-
-            }
+           }
         );
         const keyboardDidHideListener = Keyboard.addListener(
             'keyboardDidHide',
-            () => {
-                setKeyboard(false);
+            async() => {
                 try {
-                    const q = query(collection(db, "message"), or(
-                        where("receiver", "==", User.id),
-                        where("sender", "==", User.id)
-                    ), orderBy('createdAt'))
-
-                    onSnapshot(q, (snapshot) => {
-                        let array: any = []
-                        snapshot.forEach((doc) => {
-                            // doc.data() is never undefined for query doc snapshots
-                            array.push({ id: doc.id, ...doc.data(), keyboard: false })
-                        });
-                        setChatDataFire(array)
-
-                    })
+                    const userRef = doc(db, "users", User?.id);
+                    let update:any = {
+                         ...User,
+                         keyboard:null
+                     }
+                     return await updateDoc(userRef, update)
                 } catch (error) {
-
                     console.log("error", error)
-                } // or some other action
+                } 
             }
         );
 
     }, [])
+    // console.log("Fire",ChatDataFire);
+    
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
@@ -223,26 +205,26 @@ export default function SMS() {
                 )
             }
             {
-                // ChatDataFire[0]?.keyboard && ChatDataFire[0].sender!==currentUser.id? (
-                //     <View style={{
-                //         width: 70,
-                //         borderRadius: 10,
-                //         height: 100,
-                //         backgroundColor: 'gray'
-                //     }}>
-                //         <Text style={{
-                //             color: 'white',
-                //             fontSize: 16
-                //         }}>Typing</Text>
-                //     </View>
-                // ) : null
+                User.Keyboard!==currentUser.id && ChatDataFire[0].sender!==currentUser.id? (
+                    <View style={{
+                        width: 70,
+                        borderRadius: 10,
+                        height: 100,
+                        backgroundColor: 'gray'
+                    }}>
+                        <Text style={{
+                            color: 'white',
+                            fontSize: 16
+                        }}>Typing</Text>
+                    </View>
+                ) : null
             }
 
             {/* Last Chating Keyboard Fix Position Part */}
             <View style={styles.Positions}>
                 <Pressable style={[styles.InputsMain, { width: '80%' }]}>
                     <View style={{
-                        width: massage.length ? '90%' : '65%',
+                        width: massage.length ?  '90%' : '65%',
                         flexDirection: 'row',
                         alignItems: 'center',
                         gap: 15
