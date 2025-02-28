@@ -66,7 +66,6 @@ export default function Chats() {
       CloseData()
     }
   }, []);
-console.log("AllUser:-",Alluser);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>

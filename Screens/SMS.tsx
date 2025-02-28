@@ -13,6 +13,7 @@ import { AutoScrollFlatList } from "react-native-autoscroll-flatlist";
 import { addDoc, collection, getDocs, onSnapshot, query, where, Timestamp, serverTimestamp, or, orderBy, and, doc, updateDoc } from 'firebase/firestore';
 import db from '../firebase.config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Use } from 'react-native-svg';
 const width = Dimensions.get('window').width;
 export default function SMS() {
     const animation = useRef(new Animated.Value(0)).current;
@@ -31,51 +32,150 @@ export default function SMS() {
     const Route = useRoute<any>();
     const User = Route.params.user;
 
-    const OnMeassege = () => {
+    const OnMeassege = async () => {
 
-        if (massage.length) {
-            setShowModal(false)
-            const chatDataMassageFire = {
-                message: massage,
-                sender: currentUser.id,
-                receiver: User.id,
-                createdAt: serverTimestamp(),
-                read: false
+        try {
+            if (massage.length) {
+                setShowModal(false)
+                //         let chatDataMassageFire = {
+                //             chatID: `${currentUser.id}_${User.id}`,
+                //             meassgeList: [
+                //                 {
+                //                     message: massage,
+                //                     sender: currentUser.id,
+                //                     receiver: User.id,
+                //                     createdAt: serverTimestamp(),
+                //                     read: false
+                //                 }
+                //             ]
+    
+                //         }
+                //         console.log("chatDataMassageFire",chatDataMassageFire);
+                //         addDoc(collection(db, "message"), chatDataMassageFire)
+                //         .then((res) => {
+                //             setTyping(!Typing)
+                //         })
+                //         .catch((error) => {
+                //             console.log(error);
+                //         })
+                // }
+                //     //     const MassgeCreateFire = (chatDataMassageFire: any) => {
+    
+                //     //     MassgeCreateFire(chatDataMassageFire);
+                //     // }
+                const q = query(collection(db, "message"), or(
+                    where("ChatId", "==", `${User.id}_${currentUser.id}`),
+                    where("ChatId", "==", `${currentUser.id}_${User.id}`)
+                ));
+                let message: any = null
+                const querySnapshot = await getDocs(q);
+                console.log("querySnapshot",querySnapshot);
+                
+                querySnapshot.forEach((doc) => {
+                    
+                    //   console.log(doc.id, " => ", doc.data());
+                    message = { id: doc.id, ...doc.data() }
+                });
+                console.log("Ready To  chat", message);
+                // return
+                if (message && message !== null) {
+                    // Alert.alert("If")
+    
+                    // let Data = {
+                    //     ChatId: `${User.id}_${currentUser.id}`,
+                    //     OnMessageList: [
+                    //         ...message.OnMessageList,
+                    //         {
+                    //             message: massage,
+                    //             sender: currentUser.id,
+                    //             receiver: User.id,
+                    //             createdAt: new Date(),
+                    //             read: false
+                    //         }
+                    //     ]
+                    // }
+                    // console.log(Data);
+                    message.OnMessageList.push( {
+                                    message: massage,
+                                    sender: currentUser.id,
+                                    receiver: User.id,
+                                    createdAt: new Date(),
+                                    read: false
+                                })
+                    const CloseData = async()=>{
+                        currentUser.Active = false
+                        const userRef = doc(db, "users", message.id);
+                        return await updateDoc(userRef, message)
+                      }      
+                      CloseData()
+                } else {
+                    const MassgeCreateFire = () => {
+                        let Data = {
+                            ChatId: `${User.id}_${currentUser.id}`,
+                            OnMessageList: [
+                                {
+                                    message: massage,
+                                    sender: currentUser.id,
+                                    receiver: User.id,
+                                    createdAt: new Date(),
+                                    read: false
+                                }
+                            ]
+                        }
+                        addDoc(collection(db, "message"), Data)
+                        .then((res) => {
+                              
+                                setTyping(!Typing)
+                                console.log("res",res);
+                                
+                            })
+                            .catch((error) => {
+                                
+                                Alert.alert("error")
+                                console.log(error);
+                            })
+                            Alert.alert("any")
+    
+                    }
+                    MassgeCreateFire();
+                }
+                setMassge('');
             }
-            const MassgeCreateFire = (chatDataMassageFire: any) => {
-                addDoc(collection(db,"message"), chatDataMassageFire)
-                    .then((res) => {
-                        setTyping(!Typing)
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    })
-            }
-            MassgeCreateFire(chatDataMassageFire);
+        } catch (error) {
+            console.log(error);
+            
         }
-        setMassge('');
     }
 
     useEffect(() => {
-        let user:any;
+        let user: any;
         const GeCurentyUser = async () => {
             try {
                 let data = await AsyncStorage.getItem('user');
-             user = JSON.parse(data as never);
-                console.log("user",user);
+                user = JSON.parse(data as never);
+
                 setCurrentUser(user)
                 try {
                     const q = query(collection(db, "message"), and(
-                        where("receiver", "==", User.id),
-                        where("sender", "==", user.id)
+                        // where("receiver", "==", User.id),
+                        // where("sender", "==", user.id)
+                        where("ChatId", "==", `${User.id}_${user.id}`),
+                        where("ChatId", "==", `${user.id}_${User.id}`)
                     ), orderBy('createdAt'))
-    
+
                     onSnapshot(q, (snapshot) => {
-                        let array: any = [];
-                        snapshot.forEach((doc) => {
-                            array.push({ id: doc.id, ...doc.data() })
-                        });
-                        setChatDataFire(array)
+                        // let array: any = [];
+                        // snapshot.forEach((doc) => {
+                        //     array.push({ id: doc.id, ...doc.data() })
+                        //     console.log(doc);
+                            
+                        // });
+                        // setChatDataFire(array)
+                        // console.log("FFFF",array);
+                        const user = snapshot.docs[0]
+                        console.log("user1",user);
+                        
+                        
                     })
                 } catch (error) {
                     console.log("error", error)
@@ -88,40 +188,40 @@ export default function SMS() {
 
         const keyboardDidShowListener = Keyboard.addListener(
             'keyboardDidShow',
-           async()=>{
+            async () => {
                 try {
-                    console.log("cuurentUser",user);
-                    
+                    // console.log("cuurentUser", user);
+
                     const userRef = doc(db, "users", User.id);
-                    let update:any = {
+                    let update: any = {
                         User,
-                         keyboard:user.id
-                     }
-                     await updateDoc(userRef, update)
+                        keyboard: user.id
+                    }
+                    await updateDoc(userRef, update)
                 } catch (error) {
                     console.log(error);
                 }
-           }
+            }
         );
         const keyboardDidHideListener = Keyboard.addListener(
             'keyboardDidHide',
-            async() => {
+            async () => {
                 try {
                     const userRef = doc(db, "users", User?.id);
-                    let update:any = {
-                         ...User,
-                         keyboard:null
-                     }
-                     return await updateDoc(userRef, update)
+                    let update: any = {
+                        ...User,
+                        keyboard: null
+                    }
+                    return await updateDoc(userRef, update)
                 } catch (error) {
                     console.log("error", error)
-                } 
+                }
             }
         );
 
     }, [])
     // console.log("Fire",ChatDataFire);
-    
+
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
@@ -205,7 +305,7 @@ export default function SMS() {
                 )
             }
             {
-                User.Keyboard!==currentUser.id && ChatDataFire[0].sender!==currentUser.id? (
+                User.Keyboard !== currentUser?.id && ChatDataFire[0]?.sender !== currentUser?.id ? (
                     <View style={{
                         width: 70,
                         borderRadius: 10,
@@ -224,7 +324,7 @@ export default function SMS() {
             <View style={styles.Positions}>
                 <Pressable style={[styles.InputsMain, { width: '80%' }]}>
                     <View style={{
-                        width: massage.length ?  '90%' : '65%',
+                        width: massage.length ? '90%' : '65%',
                         flexDirection: 'row',
                         alignItems: 'center',
                         gap: 15
