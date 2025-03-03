@@ -33,68 +33,22 @@ export default function SMS() {
     const User = Route.params.user;
 
     const OnMeassege = async () => {
-
+        
         try {
             if (massage.length) {
                 setShowModal(false)
-                //         let chatDataMassageFire = {
-                //             chatID: `${currentUser.id}_${User.id}`,
-                //             meassgeList: [
-                //                 {
-                //                     message: massage,
-                //                     sender: currentUser.id,
-                //                     receiver: User.id,
-                //                     createdAt: serverTimestamp(),
-                //                     read: false
-                //                 }
-                //             ]
-    
-                //         }
-                //         console.log("chatDataMassageFire",chatDataMassageFire);
-                //         addDoc(collection(db, "message"), chatDataMassageFire)
-                //         .then((res) => {
-                //             setTyping(!Typing)
-                //         })
-                //         .catch((error) => {
-                //             console.log(error);
-                //         })
-                // }
-                //     //     const MassgeCreateFire = (chatDataMassageFire: any) => {
-    
-                //     //     MassgeCreateFire(chatDataMassageFire);
-                //     // }
                 const q = query(collection(db, "message"), or(
                     where("ChatId", "==", `${User.id}_${currentUser.id}`),
                     where("ChatId", "==", `${currentUser.id}_${User.id}`)
-                ));
+                ))
                 let message: any = null
                 const querySnapshot = await getDocs(q);
-                console.log("querySnapshot",querySnapshot);
-                
                 querySnapshot.forEach((doc) => {
-                    
-                    //   console.log(doc.id, " => ", doc.data());
                     message = { id: doc.id, ...doc.data() }
                 });
                 console.log("Ready To  chat", message);
                 // return
                 if (message && message !== null) {
-                    // Alert.alert("If")
-    
-                    // let Data = {
-                    //     ChatId: `${User.id}_${currentUser.id}`,
-                    //     OnMessageList: [
-                    //         ...message.OnMessageList,
-                    //         {
-                    //             message: massage,
-                    //             sender: currentUser.id,
-                    //             receiver: User.id,
-                    //             createdAt: new Date(),
-                    //             read: false
-                    //         }
-                    //     ]
-                    // }
-                    // console.log(Data);
                     message.OnMessageList.push( {
                                     message: massage,
                                     sender: currentUser.id,
@@ -104,8 +58,9 @@ export default function SMS() {
                                 })
                     const CloseData = async()=>{
                         currentUser.Active = false
-                        const userRef = doc(db, "users", message.id);
-                        return await updateDoc(userRef, message)
+                        const userRef = doc(db, "message", message.id);
+                        await updateDoc(userRef, message)
+                        return 
                       }      
                       CloseData()
                 } else {
@@ -124,17 +79,13 @@ export default function SMS() {
                         }
                         addDoc(collection(db, "message"), Data)
                         .then((res) => {
-                              
                                 setTyping(!Typing)
-                                console.log("res",res);
-                                
                             })
                             .catch((error) => {
                                 
                                 Alert.alert("error")
                                 console.log(error);
                             })
-                            Alert.alert("any")
     
                     }
                     MassgeCreateFire();
@@ -155,27 +106,21 @@ export default function SMS() {
                 user = JSON.parse(data as never);
 
                 setCurrentUser(user)
+                console.log(`${User.id}_${user.id}`);
+                console.log(`${user.id}_${User.id}`);
+                
                 try {
-                    const q = query(collection(db, "message"), and(
-                        // where("receiver", "==", User.id),
-                        // where("sender", "==", user.id)
+                    const q = query(collection(db, "message"), or(
                         where("ChatId", "==", `${User.id}_${user.id}`),
                         where("ChatId", "==", `${user.id}_${User.id}`)
-                    ), orderBy('createdAt'))
-
+                    ))
                     onSnapshot(q, (snapshot) => {
-                        // let array: any = [];
-                        // snapshot.forEach((doc) => {
-                        //     array.push({ id: doc.id, ...doc.data() })
-                        //     console.log(doc);
+                        let array: any ;
+                        snapshot.forEach((doc) => {
+                            array=doc.data().OnMessageList
                             
-                        // });
-                        // setChatDataFire(array)
-                        // console.log("FFFF",array);
-                        const user = snapshot.docs[0]
-                        console.log("user1",user);
-                        
-                        
+                        });
+                        setChatDataFire(array);
                     })
                 } catch (error) {
                     console.log("error", error)
@@ -194,7 +139,7 @@ export default function SMS() {
 
                     const userRef = doc(db, "users", User.id);
                     let update: any = {
-                        User,
+                       ...User,
                         keyboard: user.id
                     }
                     await updateDoc(userRef, update)
@@ -220,9 +165,6 @@ export default function SMS() {
         );
 
     }, [])
-    // console.log("Fire",ChatDataFire);
-
-
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: isDark ? 'black' : 'white' }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
@@ -257,11 +199,6 @@ export default function SMS() {
                     </AnimationBTn>
                 </View>
             </View>
-
-
-
-            {/* Center Part */}
-
             {
                 ChatDataFire?.length ? (
                     <AutoScrollFlatList
@@ -305,7 +242,7 @@ export default function SMS() {
                 )
             }
             {
-                User.Keyboard !== currentUser?.id && ChatDataFire[0]?.sender !== currentUser?.id ? (
+                User?.Keyboard  && User?.id == currentUser?.id? (
                     <View style={{
                         width: 70,
                         borderRadius: 10,
@@ -319,8 +256,6 @@ export default function SMS() {
                     </View>
                 ) : null
             }
-
-            {/* Last Chating Keyboard Fix Position Part */}
             <View style={styles.Positions}>
                 <Pressable style={[styles.InputsMain, { width: '80%' }]}>
                     <View style={{
@@ -400,7 +335,6 @@ export default function SMS() {
                                 <AnimationBTn onPressIn={OnMeassege}>
                                     <Ionicons name='send' size={24} color={'white'} />
                                 </AnimationBTn>
-
                                 :
                                 <AnimationBTn >
                                     <FontAwesome6 name='microphone' size={24} color={'white'} />

@@ -6,7 +6,7 @@ import Feather from 'react-native-vector-icons/Feather'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { useNavigation } from '@react-navigation/native'
-import { addDoc, collection, doc, onSnapshot, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, doc, onSnapshot, or, query, updateDoc, where } from 'firebase/firestore'
 import db from '../firebase.config'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import ContentLoader, { Rect, Circle, Path } from "react-content-loader/native"
@@ -22,6 +22,7 @@ export default function Chats() {
   const [ChatDataFire, setChatDataFire] = useState<any>();
   const [currentUser, setCurrentUser] = useState<any>()
   // const [userActive,setUserActive] = useState<boolean>(false)
+  const [LastData,setLastData] = useState<any>([])
 
 
   useEffect(() => {
@@ -38,31 +39,49 @@ export default function Chats() {
         // console.log("userData",userData);
         const userRef = doc(db, "users", userData.id);
         await updateDoc(userRef, userData)
-  
-    
+
+
         setCurrentUser(userData)
       } catch (error) {
         console.log(error);
       }
-   
-      if (userData && userData!=='') {
+
+     
+      const GetLastMassageUsers = () => {
+        try {
+          const q = query(collection(db, "message"))
+
+          onSnapshot(q, (snapshot) => {
+            let array: any = [];
+            snapshot.forEach((doc) => {
+              array.push(doc.data())
+            });
+            setLastData(array);
+          })
+        } catch (error) {
+          console.log("error", error)
+        }
+      }
+      GetLastMassageUsers()
+
+      if (userData && userData !== '') {
         QuerySnapshot.forEach((doc) => {
-        
-          if(userData.id !== doc.id)
-          users.push({ id: doc.id, ...doc.data()})
-      })
-      // console.log(userData.id);
+
+          if (userData.id !== doc.id)
+            users.push({ id: doc.id, ...doc.data() })
+        })
+        // console.log(userData.id);
         setAlluser(users);
       }
     })
 
 
     return () => {
-      const CloseData = async()=>{
+      const CloseData = async () => {
         currentUser.Active = false
         const userRef = doc(db, "users", currentUser.id);
         return await updateDoc(userRef, currentUser)
-      }      
+      }
       CloseData()
     }
   }, []);
@@ -102,11 +121,14 @@ export default function Chats() {
           Alluser.length ? (
 
             Alluser.map((el, inx) => {
+             console.log(LastData);
+             
+              
               return (
                 <TouchableOpacity style={styles.User} key={inx} onPress={() => navigate('SMS', { user: el })}>
                   <View style={{
                     width: '15%',
-                    flexDirection:'row',
+                    flexDirection: 'row',
                   }}>
                     <Image
                       source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDDpy_pcfKg5nerCjf-g9HG7f5NNBfAk3LS7wNmRlOU7looHAEL6KIFBI&s' }}
@@ -118,7 +140,7 @@ export default function Chats() {
                     />
                     {
                       // console.log(el)
-                      
+
                       // el.Active ?  <View 
                       // style={{
                       //   width:10,
@@ -133,12 +155,20 @@ export default function Chats() {
                   <View style={{ width: '85%', paddingHorizontal: 15 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
                       <Text>{el.name}</Text>
-                      <Text style={{ opacity: 0.5 }}>Time</Text>
+                      <Text style={{ opacity: 0.5 }}>{"Time"}</Text>
                     </View>
+                    {/* <Text style={{
+                      opacity: 0.5,
+                      fontWeight: '500'
+                    }}>
+                      {
+                        
+                      }
+                    </Text> */}
                     <Text style={{
                       opacity: 0.5,
                       fontWeight: '500'
-                    }}>{el.keyboard!==null ? "Typing..": "Good Mornning"}</Text>
+                    }}>{LastData[inx]?.ChatId?.includes(`${el?.receiver || el?.sender}` ? LastData[inx]?.OnMessageList[OnMessageList.length - 1]?.message : 'no')}</Text>
                   </View>
 
                 </TouchableOpacity>

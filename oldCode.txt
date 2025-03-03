@@ -1,0 +1,17 @@
+ const chatId1 = `${User.id}_${user.id}`;
+                const chatId2 = `${user.id}_${User.id}`;
+        
+                const q1 = query(collection(db, "message"), where("ChatId", "==", chatId1));
+                const q2 = query(collection(db, "message"), where("ChatId", "==", chatId2));
+        
+                onSnapshot(q1, (snapshot1) => {
+                    let messages: any[] = [];
+                    snapshot1.forEach((doc) => messages.push({ id: doc.id, ...doc.data() }));
+                    console.log("Live Chat Messages (Query 1):", messages);
+                });
+        
+                onSnapshot(q2, (snapshot2) => {
+                    let messages: any[] = [];
+                    snapshot2.forEach((doc) => messages.push({ id: doc.id, ...doc.data() }));
+                    console.log("Live Chat Messages (Query 2):", messages);
+                });
