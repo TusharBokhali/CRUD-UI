@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, useColorScheme, TouchableOpacity, TextInput, Image, ScrollView, Alert } from 'react-native'
+import { View, Text, StyleSheet, useColorScheme, TouchableOpacity, TextInput, Image, ScrollView, Alert, AppState } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -17,17 +17,11 @@ export default function Chats() {
   const isDark = useColorScheme() === 'dark';
   const { navigate } = useNavigation<any>();
   const [Alluser, setAlluser] = useState<any[]>([]);
-  // const [currentUser,setCurrentUser] = useState<any>();
   const [userChatMassage, setuserChatMassage] = useState<string>('');
   const [ChatDataFire, setChatDataFire] = useState<any>();
   const [currentUser, setCurrentUser] = useState<any>()
-  // const [userActive,setUserActive] = useState<boolean>(false)
   const [LastData,setLastData] = useState<any>([])
-
-
   useEffect(() => {
-    // setUserActive(true)
-
     const ref = collection(db, "users")
     onSnapshot(ref, async (QuerySnapshot) => {
       const users: any = [];
@@ -35,18 +29,11 @@ export default function Chats() {
       try {
         let data = await AsyncStorage.getItem('user');
         userData = JSON.parse(data as never);
-        userData.Active = true;
-        // console.log("userData",userData);
-        const userRef = doc(db, "users", userData.id);
-        await updateDoc(userRef, userData)
-
-
         setCurrentUser(userData)
       } catch (error) {
         console.log(error);
       }
 
-     
       const GetLastMassageUsers = () => {
         try {
           const q = query(collection(db, "message"))
@@ -75,15 +62,45 @@ export default function Chats() {
       }
     })
 
+    const handleAppStateChange = (nextAppState:any) => {
+
+      if (nextAppState === "active") {
+        const ref = collection(db, "users")
+        onSnapshot(ref, async (QuerySnapshot) => {
+          const users: any = [];
+          let userData;
+          try {
+            let data = await AsyncStorage.getItem('user');
+            userData = JSON.parse(data as never);
+            userData.Active = true;
+            // console.log("userData",userData);
+            const userRef = doc(db, "users", userData.id);
+            await updateDoc(userRef, userData)
+    
+    
+            setCurrentUser(userData)
+          } catch (error) {
+            console.log(error);
+          }
+        })
+      } else if (nextAppState === "background") {
+        const CloseData = async () => {
+              currentUser.Active = false
+              const userRef = doc(db, "users", currentUser.id);
+              return await updateDoc(userRef, currentUser)
+            }
+            CloseData()
+      } else if (nextAppState === "inactive") {
+        console.log("User is Inactive (App Closing or Switching)");
+      }
+      // setAppState(nextAppState);
+    };
+
+    const subscription = AppState.addEventListener("change", handleAppStateChange);
 
     return () => {
-      const CloseData = async () => {
-        currentUser.Active = false
-        const userRef = doc(db, "users", currentUser.id);
-        return await updateDoc(userRef, currentUser)
-      }
-      CloseData()
-    }
+      subscription.remove();
+    };
   }, []);
 
   return (
@@ -119,11 +136,8 @@ export default function Chats() {
         </View>
         {
           Alluser.length ? (
-
             Alluser.map((el, inx) => {
-             console.log(LastData);
-             
-              
+              console.log(el)
               return (
                 <TouchableOpacity style={styles.User} key={inx} onPress={() => navigate('SMS', { user: el })}>
                   <View style={{
@@ -139,17 +153,15 @@ export default function Chats() {
                       }}
                     />
                     {
-                      // console.log(el)
-
-                      // el.Active ?  <View 
-                      // style={{
-                      //   width:10,
-                      //   height:10,
-                      //   borderRadius:50,
-                      //   backgroundColor:'green',
-                      //   position: 'absolute',
-                      // }}
-                      // /> : null
+                      el.Active ?  <View 
+                      style={{
+                        width:10,
+                        height:10,
+                        borderRadius:50,
+                        backgroundColor:'green',
+                        position: 'absolute',
+                      }}
+                      /> : null
                     }
                   </View>
                   <View style={{ width: '85%', paddingHorizontal: 15 }}>
@@ -157,18 +169,10 @@ export default function Chats() {
                       <Text>{el.name}</Text>
                       <Text style={{ opacity: 0.5 }}>{"Time"}</Text>
                     </View>
-                    {/* <Text style={{
-                      opacity: 0.5,
-                      fontWeight: '500'
-                    }}>
-                      {
-                        
-                      }
-                    </Text> */}
                     <Text style={{
                       opacity: 0.5,
                       fontWeight: '500'
-                    }}>{LastData[inx]?.ChatId?.includes(`${el?.receiver || el?.sender}` ? LastData[inx]?.OnMessageList[OnMessageList.length - 1]?.message : 'no')}</Text>
+                    }}>{""}</Text>
                   </View>
 
                 </TouchableOpacity>

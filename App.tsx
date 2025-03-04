@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable jsx-quotes */
-import { View, Text, StatusBar, useColorScheme } from 'react-native'
+import { View, Text, StatusBar, useColorScheme, AppState } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
@@ -17,7 +17,7 @@ import { CurrentUsers } from './hooks/UseContext';
 export default function App() {
   const Stack = createNativeStackNavigator();
   // const [loading, setLoading] = useState(true);
-  const [user,setUser] = useState(null);
+  const [user, setUser] = useState(null);
   const isDark = useColorScheme() === 'dark';
   // const {replace} = useNavigation<any>();
   // let userData = ''
@@ -42,27 +42,29 @@ export default function App() {
   // if (loading) {
   //   return <Text>Loading...</Text>; // You can use a custom splash screen here
   // }
- 
+
   // const data = "static"
   // console.log("userApp",data);
   // console.log("data userApp",user);
+  // const [appState, setAppState] = useState(AppState.currentState);
 
+  useEffect(() => {
 
+  }, []);
   return (
     <>
-        
-          <NavigationContainer>
-          <StatusBar backgroundColor='transparent' translucent={true} barStyle={isDark ? 'light-content' : 'dark-content'} />
-            <Stack.Navigator initialRouteName='SplashScreen' screenOptions={{ headerShown: false }}>
-              <Stack.Screen name='LogIn' component={LogIn} />
-              <Stack.Screen name='SingIn' component={SingIn} />
-              <Stack.Screen name='Verifications' component={Verifications} />
-              <Stack.Screen name='Bottom' component={Bottom} />
-              <Stack.Screen name='SMS' component={SMS} />
-              <Stack.Screen name='SplashScreen' component={SplashScreen} />
-            </Stack.Navigator>
-        </NavigationContainer>
-      
+      <NavigationContainer>
+        <StatusBar backgroundColor='transparent' translucent={true} barStyle={isDark ? 'light-content' : 'dark-content'} />
+        <Stack.Navigator initialRouteName='SplashScreen' screenOptions={{ headerShown: false }}>
+          <Stack.Screen name='LogIn' component={LogIn} />
+          <Stack.Screen name='SingIn' component={SingIn} />
+          <Stack.Screen name='Verifications' component={Verifications} />
+          <Stack.Screen name='Bottom' component={Bottom} />
+          <Stack.Screen name='SMS' component={SMS} />
+          <Stack.Screen name='SplashScreen' component={SplashScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+
     </>
   )
 }
