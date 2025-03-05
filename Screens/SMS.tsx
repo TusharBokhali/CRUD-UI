@@ -10,7 +10,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { measure } from 'react-native-reanimated';
 import { AutoScrollFlatList } from "react-native-autoscroll-flatlist";
-import { addDoc, collection, getDocs, onSnapshot, query, where, Timestamp, serverTimestamp, or, orderBy, and, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, onSnapshot, where, Timestamp, serverTimestamp, or, orderBy, and, doc, updateDoc, query } from 'firebase/firestore';
 import db from '../firebase.config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Use } from 'react-native-svg';
@@ -29,11 +29,12 @@ export default function SMS() {
     const [ChatDataFire, setChatDataFire] = useState<any[]>([]);
     const [Typing, setTyping] = useState(false);
     const [KeyboardSet, setKeyboard] = useState(false)
+    const [chatUsers, setchatUsers] = useState<any>({});
     const Route = useRoute<any>();
     const User = Route.params.user;
 
+
     const OnMeassege = async () => {
-        
         try {
             if (massage.length) {
                 setShowModal(false)
@@ -46,23 +47,21 @@ export default function SMS() {
                 querySnapshot.forEach((doc) => {
                     message = { id: doc.id, ...doc.data() }
                 });
-                console.log("Ready To  chat", message);
-                // return
                 if (message && message !== null) {
-                    message.OnMessageList.push( {
-                                    message: massage,
-                                    sender: currentUser.id,
-                                    receiver: User.id,
-                                    createdAt: new Date(),
-                                    read: false
-                                })
-                    const CloseData = async()=>{
+                    message.OnMessageList.push({
+                        message: massage,
+                        sender: currentUser.id,
+                        receiver: User.id,
+                        createdAt:new Date(),
+                        read: false
+                    })
+                    const CloseData = async () => {
                         currentUser.Active = false
                         const userRef = doc(db, "message", message.id);
                         await updateDoc(userRef, message)
-                        return 
-                      }      
-                      CloseData()
+                        return
+                    }
+                    CloseData()
                 } else {
                     const MassgeCreateFire = () => {
                         let Data = {
@@ -72,21 +71,21 @@ export default function SMS() {
                                     message: massage,
                                     sender: currentUser.id,
                                     receiver: User.id,
-                                    createdAt: new Date(),
+                                    createdAt:new Date(),
                                     read: false
                                 }
                             ]
                         }
                         addDoc(collection(db, "message"), Data)
-                        .then((res) => {
+                            .then((res) => {
                                 setTyping(!Typing)
                             })
                             .catch((error) => {
-                                
+
                                 Alert.alert("error")
                                 console.log(error);
                             })
-    
+
                     }
                     MassgeCreateFire();
                 }
@@ -94,7 +93,7 @@ export default function SMS() {
             }
         } catch (error) {
             console.log(error);
-            
+
         }
     }
 
@@ -104,23 +103,23 @@ export default function SMS() {
             try {
                 let data = await AsyncStorage.getItem('user');
                 user = JSON.parse(data as never);
-
                 setCurrentUser(user)
-                console.log(`${User.id}_${user.id}`);
-                console.log(`${user.id}_${User.id}`);
-                
                 try {
                     const q = query(collection(db, "message"), or(
                         where("ChatId", "==", `${User.id}_${user.id}`),
                         where("ChatId", "==", `${user.id}_${User.id}`)
                     ))
                     onSnapshot(q, (snapshot) => {
-                        let array: any ;
+                        let array: any;
                         snapshot.forEach((doc) => {
-                            array=doc.data().OnMessageList
-                            
+                            array = doc.data().OnMessageList
                         });
                         setChatDataFire(array);
+                    })
+
+                    const qchatUser = doc(db, "users", User.id)
+                    onSnapshot(qchatUser, (snapshot) => {
+                        setchatUsers({ ...snapshot.data(), id: snapshot.id })
                     })
                 } catch (error) {
                     console.log("error", error)
@@ -135,12 +134,10 @@ export default function SMS() {
             'keyboardDidShow',
             async () => {
                 try {
-                    // console.log("cuurentUser", user);
-
-                    const userRef = doc(db, "users", User.id);
+                    const userRef = doc(db, "users", user.id);
                     let update: any = {
-                       ...User,
-                        keyboard: user.id
+                        ...user,
+                        keyboard: User.id
                     }
                     await updateDoc(userRef, update)
                 } catch (error) {
@@ -152,9 +149,9 @@ export default function SMS() {
             'keyboardDidHide',
             async () => {
                 try {
-                    const userRef = doc(db, "users", User?.id);
+                    const userRef = doc(db, "users", user?.id);
                     let update: any = {
-                        ...User,
+                        ...user,
                         keyboard: null
                     }
                     return await updateDoc(userRef, update)
@@ -208,7 +205,8 @@ export default function SMS() {
                         data={ChatDataFire}
                         keyExtractor={(item, index: number) => `${index}`}
                         renderItem={({ item, index }) => {
-                            // console.log("item",item.message);
+                            // console.log(item);
+                            
                             return (
                                 currentUser.id === ChatDataFire[index].sender ? (
                                     <View style={[styles.ChatMain, {
@@ -242,19 +240,20 @@ export default function SMS() {
                 )
             }
             {
-                User?.Keyboard  && User?.id == currentUser?.id? (
-                    <View style={{
-                        width: 70,
-                        borderRadius: 10,
-                        height: 100,
-                        backgroundColor: 'gray'
-                    }}>
-                        <Text style={{
-                            color: 'white',
-                            fontSize: 16
-                        }}>Typing</Text>
-                    </View>
-                ) : null
+                chatUsers?.keyboard && chatUsers?.keyboard == currentUser?.id ?
+                    (
+                        <View style={{
+                            width: 70,
+                            borderRadius: 10,
+                            height: 100,
+                            backgroundColor: 'gray'
+                        }}>
+                            <Text style={{
+                                color: 'white',
+                                fontSize: 16
+                            }}>Typing</Text>
+                        </View>
+                    ) : null
             }
             <View style={styles.Positions}>
                 <Pressable style={[styles.InputsMain, { width: '80%' }]}>
@@ -311,9 +310,7 @@ export default function SMS() {
                                             }}
                                         />
                                     </AnimationBTn>
-
                                     <AnimationBTn>
-
                                         <Image
                                             source={require('../assets/Images/camera.png')}
                                             style={{
@@ -325,7 +322,6 @@ export default function SMS() {
                                 </View>
                             )
                         }
-
                     </View>
                 </Pressable>
                 <View style={{ width: '15%' }}>
@@ -396,14 +392,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         maxWidth: '80%',
-
     },
     ChatMain: {
         maxWidth: '85%',
         backgroundColor: '#685814',
-
-        // borderBottomRightRadius:10,
-        // alignSelf: 'flex-end',
         paddingVertical: 5,
         paddingHorizontal: 10,
         marginVertical: 5,
@@ -445,7 +437,4 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         fontSize: 14
     },
-    Skeleton: {
-        // backgroundColor:'#685814',
-    }
 })

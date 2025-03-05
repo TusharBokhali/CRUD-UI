@@ -22,6 +22,12 @@ export default function Chats() {
   const [currentUser, setCurrentUser] = useState<any>()
   const [LastData,setLastData] = useState<any>([])
   useEffect(() => {
+    const CloseData = async () => {
+      currentUser.Active = false;
+      currentUser.keyboard=null;
+      const userRef = doc(db, "users", currentUser.id);
+      return await updateDoc(userRef, currentUser)
+    }
     const ref = collection(db, "users")
     onSnapshot(ref, async (QuerySnapshot) => {
       const users: any = [];
@@ -34,22 +40,22 @@ export default function Chats() {
         console.log(error);
       }
 
-      const GetLastMassageUsers = () => {
-        try {
-          const q = query(collection(db, "message"))
+      // const GetLastMassageUsers = () => {
+      //   try {
+      //     const q = query(collection(db, "message"))
 
-          onSnapshot(q, (snapshot) => {
-            let array: any = [];
-            snapshot.forEach((doc) => {
-              array.push(doc.data())
-            });
-            setLastData(array);
-          })
-        } catch (error) {
-          console.log("error", error)
-        }
-      }
-      GetLastMassageUsers()
+      //     onSnapshot(q, (snapshot) => {
+      //       let array: any = [];
+      //       snapshot.forEach((doc) => {
+      //         array.push(doc.data())
+      //       });
+      //       setLastData(array);
+      //     })
+      //   } catch (error) {
+      //     console.log("error", error)
+      //   }
+      // }
+      // GetLastMassageUsers()
 
       if (userData && userData !== '') {
         QuerySnapshot.forEach((doc) => {
@@ -57,7 +63,6 @@ export default function Chats() {
           if (userData.id !== doc.id)
             users.push({ id: doc.id, ...doc.data() })
         })
-        // console.log(userData.id);
         setAlluser(users);
       }
     })
@@ -73,27 +78,19 @@ export default function Chats() {
             let data = await AsyncStorage.getItem('user');
             userData = JSON.parse(data as never);
             userData.Active = true;
-            // console.log("userData",userData);
             const userRef = doc(db, "users", userData.id);
             await updateDoc(userRef, userData)
-    
-    
             setCurrentUser(userData)
           } catch (error) {
             console.log(error);
           }
         })
       } else if (nextAppState === "background") {
-        const CloseData = async () => {
-              currentUser.Active = false
-              const userRef = doc(db, "users", currentUser.id);
-              return await updateDoc(userRef, currentUser)
-            }
+
             CloseData()
       } else if (nextAppState === "inactive") {
-        console.log("User is Inactive (App Closing or Switching)");
+        // CloseData()
       }
-      // setAppState(nextAppState);
     };
 
     const subscription = AppState.addEventListener("change", handleAppStateChange);
@@ -129,7 +126,6 @@ export default function Chats() {
           <TextInput
             placeholder='Ask Meta AI or Search'
             style={{
-              // fontWeight:'500',
               fontSize: 16
             }}
           />
@@ -137,7 +133,6 @@ export default function Chats() {
         {
           Alluser.length ? (
             Alluser.map((el, inx) => {
-              console.log(el)
               return (
                 <TouchableOpacity style={styles.User} key={inx} onPress={() => navigate('SMS', { user: el })}>
                   <View style={{

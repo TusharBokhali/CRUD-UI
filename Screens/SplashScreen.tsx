@@ -18,7 +18,6 @@ export default function SplashScreen() {
         }else{
           replace('LogIn');
         }
-      //  console.log(userData);
       } catch (error) {
         console.log(error);
       }
@@ -34,7 +33,6 @@ export default function SplashScreen() {
       style={{
         width:100,
         height:100,
-        borderRadius:70
       }}
       />
     </View>
