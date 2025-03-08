@@ -10,10 +10,9 @@ import Verifications from './Screens/Verifications';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import Bottom from './Screens/Bottom';
 import SMS from './Screens/SMS';
-import { lightGreen100 } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './Screens/SplashScreen';
-import { CurrentUsers } from './hooks/UseContext';
+
 export default function App() {
   const Stack = createNativeStackNavigator();
   // const [loading, setLoading] = useState(true);

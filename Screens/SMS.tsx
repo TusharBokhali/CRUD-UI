@@ -115,6 +115,14 @@ export default function SMS() {
                             array = doc.data().OnMessageList
                         });
                         setChatDataFire(array);
+                        // console.log("Array",array);
+                        
+                        const CloseData = async () => {
+                            let data = {...User,lastData:array[array.length - 1].message,Time:array[array.length - 1]?.createdAt}
+                            const userRef = doc(db, "users", User.id);
+                            return await updateDoc(userRef, data)
+                          }
+                          CloseData();
                     })
 
                     const qchatUser = doc(db, "users", User.id)
@@ -205,8 +213,15 @@ export default function SMS() {
                         data={ChatDataFire}
                         keyExtractor={(item, index: number) => `${index}`}
                         renderItem={({ item, index }) => {
-                            // console.log(item);
-                            
+                            const date = new Date(item?.createdAt?.seconds * 1000 + item?.createdAt?.nanoseconds / 1e6);
+                            const timeString = date.toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true, 
+                              });
+                              let time = timeString.slice(0,5);
+                              let day = timeString.slice(8,11)
                             return (
                                 currentUser.id === ChatDataFire[index].sender ? (
                                     <View style={[styles.ChatMain, {
@@ -215,7 +230,7 @@ export default function SMS() {
                                         borderBottomLeftRadius: 10,
                                     }]} key={index}>
                                         <Text style={styles.chatTExt}>{item.message}</Text>
-                                        {/* <Text style={styles.Time}>{`${item.createdAt}`}</Text> */}
+                                        <Text style={styles.Time}>{`${time} ${day}`}</Text> 
                                     </View>
                                 ) : (
                                     <View style={[styles.ChatMain, {
@@ -224,7 +239,7 @@ export default function SMS() {
                                         borderBottomRightRadius: 10,
                                     }]} key={index}>
                                         <Text style={styles.chatTExt}>{item.message}</Text>
-                                        {/* <Text style={styles.Time}>{`${item.time.hours}:${item.time.minu}`}</Text> */}
+                                        <Text style={styles.Time}>{`${time} ${day}`}</Text> 
                                     </View>
                                 )
                             )
@@ -414,7 +429,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     Time: {
-        fontSize: 12,
+        fontSize: 10,
         color: 'white',
         fontWeight: '500',
         textAlign: 'right',

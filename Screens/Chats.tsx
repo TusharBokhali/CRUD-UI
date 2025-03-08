@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, useColorScheme, TouchableOpacity, TextInput, Image, ScrollView, Alert, AppState } from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { lazy, useContext, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Feather from 'react-native-vector-icons/Feather'
@@ -11,7 +11,6 @@ import db from '../firebase.config'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import ContentLoader, { Rect, Circle, Path } from "react-content-loader/native"
 import Loader from './Loader'
-import { CurrentUsers } from '../hooks/UseContext';
 
 export default function Chats() {
   const isDark = useColorScheme() === 'dark';
@@ -40,23 +39,6 @@ export default function Chats() {
         console.log(error);
       }
 
-      // const GetLastMassageUsers = () => {
-      //   try {
-      //     const q = query(collection(db, "message"))
-
-      //     onSnapshot(q, (snapshot) => {
-      //       let array: any = [];
-      //       snapshot.forEach((doc) => {
-      //         array.push(doc.data())
-      //       });
-      //       setLastData(array);
-      //     })
-      //   } catch (error) {
-      //     console.log("error", error)
-      //   }
-      // }
-      // GetLastMassageUsers()
-
       if (userData && userData !== '') {
         QuerySnapshot.forEach((doc) => {
 
@@ -64,6 +46,8 @@ export default function Chats() {
             users.push({ id: doc.id, ...doc.data() })
         })
         setAlluser(users);
+        console.log("users",users);
+        
       }
     })
 
@@ -133,6 +117,18 @@ export default function Chats() {
         {
           Alluser.length ? (
             Alluser.map((el, inx) => {
+             const date = new Date(el?.Time?.seconds * 1000 + el?.Time?.nanoseconds / 1e6);
+                            const timeString = date.toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                              hour12: true, 
+                              });
+                              let time = timeString.slice(0,5);
+                              let day = timeString.slice(8,11)
+                              // console.log(`TimePicker ${time}  ${day}`);
+                              
+             
               return (
                 <TouchableOpacity style={styles.User} key={inx} onPress={() => navigate('SMS', { user: el })}>
                   <View style={{
@@ -161,13 +157,13 @@ export default function Chats() {
                   </View>
                   <View style={{ width: '85%', paddingHorizontal: 15 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
-                      <Text>{el.name}</Text>
-                      <Text style={{ opacity: 0.5 }}>{"Time"}</Text>
+                      <Text>{el?.name}</Text>
+                      <Text style={{ opacity: 0.5,fontSize:10}}>{`${time} ${day}`}</Text>
                     </View>
                     <Text style={{
                       opacity: 0.5,
                       fontWeight: '500'
-                    }}>{""}</Text>
+                    }}>{el?.lastData}</Text>
                   </View>
 
                 </TouchableOpacity>
